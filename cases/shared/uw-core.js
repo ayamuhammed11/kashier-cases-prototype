@@ -113,7 +113,37 @@
       terminals: 1, websites: ['facebook.com/aswanspicebazaar'], payouts: [['wallet', 'Vodafone Cash', '01098765432', 'Nadia Hamed', '']] },
     { n: 1050, biz: 'Pyramids Logistics', contact: 'Ahmed Gamal', email: 'ahmed@pyramidslog.com', phone: '+20 122 600 9090', entity: 'Registered Business', industry: 'Logistics & Delivery', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-27T17:25:00',
       svc: [['Online Card', 'PF', [['National Bank of Egypt', {}]]], ['Online Aman', 'PF', [['', {}]]], ['Online Basata', 'PF', [['', {}]]]],
-      websites: ['www.pyramidslog.com'], payouts: [['bank', 'National Bank of Egypt', 'Maadi', 'Pyramids Logistics', '1005566778899']] }
+      websites: ['www.pyramidslog.com'], payouts: [['bank', 'National Bank of Egypt', 'Maadi', 'Pyramids Logistics', '1005566778899']] },
+    { n: 1052, biz: 'Smouha Fashion House', contact: 'Rania Fouad', email: 'rania@smouhafashion.com', phone: '+20 100 210 5252', entity: 'Registered Business', industry: 'Fashion & Beauty', owner: 'Egyptian Owner', sales: 'Mostafa Khaled', at: '2026-10-06T10:40:00',
+      svc: [['Online Card', 'PF', [['Bank Misr', {}]]], ['Online Valu', 'PF', [['', {}]]], ['POS Card', 'PF', [['National Bank of Egypt', {}]]]],
+      terminals: 2, websites: ['www.smouhafashion.com', 'instagram.com/smouhafashion'], payouts: [['bank', 'National Bank of Egypt', 'Main Branch', 'Smouha Fashion House', '1007788990011']] },
+    { n: 1053, biz: 'Maadi Vet Clinic', contact: 'Dr. Sameh Nour', email: 'sameh@maadivet.com', phone: '+20 111 450 5353', entity: 'Professional Business', industry: 'Healthcare / Pharmacy', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-16T13:15:00',
+      svc: [['POS Card', 'PF', [['National Bank of Egypt', {}]]], ['POS Souhoola', 'PF', [['', {}]]]],
+      terminals: 1, payouts: [['bank', 'National Bank of Egypt', 'Maadi', 'Sameh Nour', '1004455667788']] },
+    { n: 1054, biz: 'Red Sea Diving Gear', contact: 'Tarek Nabil', email: 'tarek@redseagear.com', phone: '+20 106 330 5454', entity: 'Registered Business', industry: 'Retail & E-commerce', owner: 'Egyptian Owner', sales: 'Nour Hamdy', at: '2026-10-19T11:50:00',
+      svc: [['Online Card', 'PSP', [['National Bank of Egypt', {}]], ['EGP', 'USD']], ['Online Wallet', 'PF', [['', {}]]]],
+      websites: ['www.redseagear.com'], payouts: [['bank', 'CIB', 'Mohandessin', 'Tarek Nabil Ahmed', '100099887766']] },
+    { n: 1055, biz: 'Tanta Sweets', contact: 'Waleed Ezz', email: 'waleed@tantasweets.com', phone: '+20 122 880 5555', entity: 'Individual Seller', industry: 'Food & Beverage', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-27T09:35:00',
+      svc: [['POS Card', 'PF', [['Bank Misr', {}]]], ['POS Wallet', 'PF', [['', {}]]]],
+      terminals: 3, payouts: [['wallet', 'Vodafone Cash', '01055556666', 'Waleed Ezz', '']] },
+    { n: 1056, biz: 'Nasr City Electronics', contact: 'Mona Adel', email: 'mona@nasrelectronics.com', phone: '+20 100 990 5656', entity: 'Registered Business', industry: 'Retail & E-commerce', owner: 'Egyptian Owner', sales: 'Mostafa Khaled', at: '2026-10-08T14:00:00',
+      svc: [['Online Card', 'PF', [['National Bank of Egypt', {}]]], ['Online Forsa', 'PF', [['', {}]]], ['POS Card', 'PF', [['National Bank of Egypt', { local: 1.4 }]]], ['POS Valu', 'PF', [['', {}]]]],
+      terminals: 4, websites: ['www.nasrelectronics.com'], payouts: [['bank', 'National Bank of Egypt', 'Nasr City', 'Nasr City Electronics', '1003344556677']] },
+    { n: 1057, biz: 'Alex Marine Supplies', contact: 'Hany Selim', email: 'hany@alexmarine.com', phone: '+20 103 770 5757', entity: 'Registered Business', industry: 'Logistics & Delivery', owner: 'Egyptian Owner', sales: 'Nour Hamdy', at: '2026-09-30T10:10:00',
+      svc: [['Online Card', 'PF', [['Bank Misr', {}]]], ['Online Instapay', 'PF', [['', {}]]]],
+      websites: ['www.alexmarine.com'], payouts: [['bank', 'Banque Misr', 'Main Branch', 'Alex Marine Supplies', '20055443322']] },
+    { n: 1058, biz: 'Luxor Craft Studio', contact: 'Mariam Adly', email: 'mariam@luxorcraft.com', phone: '+20 109 660 5858', entity: 'Individual Seller', industry: 'Fashion & Beauty', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-20T15:30:00',
+      svc: [['Online Card', 'PF', [['Bank Misr', {}]]], ['Online Wallet', 'PF', [['', {}]]]],
+      websites: ['www.luxorcraft.com', 'etsy.com/shop/luxorcraft'], payouts: [['wallet', 'Orange Cash', '01258585858', 'Mariam Adly', '']] },
+    { n: 1059, biz: 'Zagazig Pharmacy', contact: 'Dr. Ehab Ragab', email: 'ehab@zagazigpharma.com', phone: '+20 155 220 5959', entity: 'Professional Business', industry: 'Healthcare / Pharmacy', owner: 'Egyptian Owner', sales: 'Mostafa Khaled', at: '2026-10-28T10:20:00',
+      svc: [['POS Card', 'PF', [['National Bank of Egypt', {}]]], ['POS Instapay', 'PF', [['', {}]]]],
+      terminals: 2, payouts: [['bank', 'National Bank of Egypt', 'Main Branch', 'Ehab Ragab', '1002323454567']] },
+    { n: 1060, biz: 'October Home Furniture', contact: 'Adel Shawky', email: 'adel@octoberhome.com', phone: '+20 100 606 0606', entity: 'Registered Business', industry: 'Retail & E-commerce', owner: 'Egyptian Owner', sales: 'Nour Hamdy', at: '2026-10-28T12:45:00',
+      svc: [['Online Card', 'PSP', [['Bank Misr', {}]], ['EGP']], ['Online Bank Installments', 'PF', [['Bank Misr', {}], ['National Bank of Egypt', {}]]], ['POS Card', 'PF', [['Bank Misr', {}]]]],
+      terminals: 2, websites: ['www.octoberhome.com'], payouts: [['bank', 'Banque Misr', 'Dokki', 'October Home Furniture', '20066778899']] },
+    { n: 1061, biz: 'Ismailia Language Center', contact: 'Rasha Wael', email: 'rasha@ismailialang.edu', phone: '+20 112 616 1616', entity: 'Professional Business', industry: 'Education', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-03T09:00:00',
+      svc: [['Online Card', 'PF', [['National Bank of Egypt', {}]]]],
+      websites: ['www.ismailialang.edu'], payouts: [['bank', 'National Bank of Egypt', 'Main Branch', 'Ismailia Language Center', '1001212343456']] }
   ];
 
   function buildApp(x) {
@@ -193,9 +223,18 @@
     'UW-1049-ONL': { status: 'Returned to Sales', assignee: 'Salma Nabil', verify: 'all', at: '2026-10-13T09:00:00', returned: { by: 'Salma Nabil', at: '2026-10-14T16:20:00', feedback: 'The POS case is approved. The Online case only needs a link that shows the products and prices.', reason: 'The Facebook page does not show the spice products or prices. Add the website or a page that shows what the merchant sells.', items: ['web'] } },
     'UW-1049-POS': { status: 'Approved', assignee: 'Salma Nabil', verify: 'all', at: '2026-10-13T09:05:00', approved: { by: 'Salma Nabil', at: '2026-10-14T16:30:00', comment: '' } },
     'UW-1050-ONL': { status: 'New' },
+    'UW-1052-ONL': { status: 'Approved', assignee: 'Omar Hassan', verify: 'all', at: '2026-10-07T09:00:00', approved: { by: 'Omar Hassan', at: '2026-10-08T11:20:00', comment: '' } },
+    'UW-1052-POS': { status: 'Approved', assignee: 'Omar Hassan', verify: 'all', at: '2026-10-07T09:10:00', approved: { by: 'Omar Hassan', at: '2026-10-08T11:35:00', comment: 'Store visit photos match the address.' } },
+    'UW-1053-POS': { status: 'Returned to Sales', assignee: 'Salma Nabil', verify: 'all', at: '2026-10-17T09:30:00', returned: { by: 'Salma Nabil', at: '2026-10-18T13:05:00', feedback: 'The rest of the case is in order. Send a photo of the clinic itself and it can be approved.', reason: 'The store image shows a pharmacy sign, not the clinic.', items: ['pos'] } },
+    'UW-1054-ONL': { status: 'Returned to Sales', assignee: 'Omar Hassan', verify: 'all', at: '2026-10-20T10:00:00', returned: { by: 'Omar Hassan', at: '2026-10-21T15:40:00', feedback: 'Add a bank account in the company name, or a letter explaining why the owner is paid personally.', reason: 'The account holder is the owner, not Red Sea Diving Gear.', items: ['payout'] } },
+    'UW-1056-POS': { status: 'Approved', assignee: 'Rana Adel', verify: 'all', at: '2026-10-09T09:00:00', approved: { by: 'Rana Adel', at: '2026-10-10T12:00:00', comment: '' } },
+    'UW-1057-ONL': { status: 'Approved', assignee: 'Salma Nabil', verify: 'all', at: '2026-10-01T09:00:00', approved: { by: 'Salma Nabil', at: '2026-10-02T10:45:00', comment: 'Bank Misr PF file sent.' } },
+    'UW-1058-ONL': { status: 'Returned to Sales', assignee: 'Rana Adel', verify: 'all', at: '2026-10-21T09:15:00', returned: { by: 'Rana Adel', at: '2026-10-22T14:30:00', feedback: 'Correct the industry and activities on the application; the documents are fine.', reason: 'The application says Fashion & Beauty, but the website sells antiques and home decor.', items: ['merchant'] } },
+    'UW-1056-ONL': { status: 'New', assignee: 'Salma Nabil', verify: 0.5, at: '2026-10-09T09:20:00' },
+    'UW-1061-ONL': { status: 'Approved', assignee: 'Rana Adel', verify: 'all', at: '2026-10-04T09:00:00', approved: { by: 'Rana Adel', at: '2026-10-05T16:10:00', comment: '' } },
   };
 
-  const STORE = 'uw-cases-v1';
+  const STORE = 'uw-cases-v2'; // bump when the sample cases change, so every browser starts from them
   const readStore = () => { try { return JSON.parse(localStorage.getItem(STORE) || '{}'); } catch (e) { return {}; } };
   let STATE = readStore();
   const persist = () => { try { localStorage.setItem(STORE, JSON.stringify(STATE)); } catch (e) { } };

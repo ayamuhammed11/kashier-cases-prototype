@@ -101,7 +101,7 @@
       terminals: 4, websites: ['www.zamalekhotel.com', 'booking.com/hotel/eg/zamalek-boutique'], payouts: [['bank', 'National Bank of Egypt', 'Main Branch', 'Zamalek Boutique Hotel', '1009988776655']] },
     { n: 1045, biz: 'Heliopolis Fitness Club', contact: 'Salma Hany', email: 'salma@heliofit.com', phone: '+20 111 909 3030', entity: 'Individual Seller', industry: 'Entertainment & Media', owner: 'Egyptian Owner', sales: 'Mostafa Khaled', at: '2026-10-27T13:00:00',
       svc: [['POS Card', 'PF', [['Bank Misr', {}]]], ['POS Wallet', 'PF', [['', {}]]], ['POS Aman', 'PF', [['', {}]]]],
-      terminals: 2, noStore: true, payouts: [['wallet', 'Orange Cash', '01234567890', 'Salma Hany', '']] },
+      terminals: 2, payouts: [['wallet', 'Orange Cash', '01234567890', 'Salma Hany', '']] },
     { n: 1047, biz: 'Mansoura Smart Tech', contact: 'Karim Fathi', email: 'karim@mansourasmart.io', phone: '+20 155 010 2020', entity: 'Registered Business', industry: 'Technology / SaaS', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-25T15:40:00',
       svc: [['Online Card', 'PSP', [['Bank Misr', { 'national-onus': 1.2 }]], ['EGP', 'USD']], ['Online Wallet', 'PF', [['', {}]]], ['Online OCTO', 'PF', [['', {}]]], ['Online Forsa', 'PF', [['', {}]]], ['Online Mogo', 'PF', [['', {}]]], ['Online Contact', 'PF', [['', {}]]]],
       websites: ['www.mansourasmart.io'], missing: ['BM PSP Agreement Annex'], payouts: [['bank', 'CIB', 'Korba', 'Mansoura Smart Tech', '100088776612']] },
@@ -113,13 +113,13 @@
       terminals: 1, websites: ['facebook.com/aswanspicebazaar'], payouts: [['wallet', 'Vodafone Cash', '01098765432', 'Nadia Hamed', '']] },
     { n: 1050, biz: 'Pyramids Logistics', contact: 'Ahmed Gamal', email: 'ahmed@pyramidslog.com', phone: '+20 122 600 9090', entity: 'Registered Business', industry: 'Logistics & Delivery', owner: 'Egyptian Owner', sales: 'Aya Muhammed', at: '2026-10-27T17:25:00',
       svc: [['Online Card', 'PF', [['National Bank of Egypt', {}]]], ['Online Aman', 'PF', [['', {}]]], ['Online Basata', 'PF', [['', {}]]]],
-      websites: ['www.pyramidslog.com'], noContract: ['Aman Contract'], payouts: [['bank', 'National Bank of Egypt', 'Maadi', 'Pyramids Logistics', '1005566778899']] }
+      websites: ['www.pyramidslog.com'], payouts: [['bank', 'National Bank of Egypt', 'Maadi', 'Pyramids Logistics', '1005566778899']] }
   ];
 
   function buildApp(x) {
     const app = { id: 'APP-' + (24080000 + x.n), n: x.n, biz: x.biz, contact: x.contact, email: x.email, phone: x.phone, entity: x.entity, industry: x.industry, activities: [x.industry],
       owner: x.owner, sales: x.sales, submittedAt: x.at, comment: x.comment || '', zoho: 'ZOHO-' + String(x.n).padStart(5, '0'), svc: {}, order: [],
-      terminals: x.terminals || 0, websites: x.websites || [], storeImage: x.noStore ? '' : slug(x.biz) + '-storefront.jpg', docs: {}, payouts: [], reqContracts: {}, contracts: [] };
+      terminals: x.terminals || 0, websites: x.websites || [], storeImage: slug(x.biz) + '-storefront.jpg', docs: {}, payouts: [], reqContracts: {}, contracts: [] };
     x.svc.forEach(([id, model, lines, currencies]) => {
       const s = { id, model, currencies: currencies || ['EGP'], ops: isCard(id) && chOf(id) === 'Online' ? ['Auth & Cap'] : [], lines: [] };
       lines.forEach(([bank, req]) => {
@@ -137,7 +137,7 @@
       if ((x.missing || []).includes(name)) return;
       app.docs[name] = {}; (DOCS[name].slots || ['File']).forEach(sl => { app.docs[name][sl] = slug(name) + (sl === 'File' ? '' : '-' + slug(sl)) + (sl === 'File' ? '.pdf' : '.jpg'); });
     });
-    requiredContracts(app, null).forEach(r => { if (!(x.noContract || []).includes(r.label)) app.reqContracts[r.label] = slug(r.label) + '-signed.pdf'; });
+    requiredContracts(app, null).forEach(r => { app.reqContracts[r.label] = slug(r.label) + '-signed.pdf'; });
     app.payouts = x.payouts.map((p, i) => p[0] === 'bank' ? { id: i + 1, type: 'bank', bank: p[1], branch: p[2], holder: p[3], acct: p[4], name: i ? 'Second account' : '' } : { id: i + 1, type: 'wallet', provider: p[1], mobile: p[2], wholder: p[3], name: p[4] || '' });
     return app;
   }
@@ -208,7 +208,7 @@
 
   /* The contract a PF service needs: the Kashier PF contract for Card, Wallet, Bank Installments and Basata, its own for the rest. */
   const contractFor = (app, id) => app.svc[id].model !== 'PF' ? '' : PF_COVERED.includes(nmOf(id)) ? 'Kashier PF Contract' : nmOf(id) + ' Contract';
-  const contractFile = (app, label, local) => app.reqContracts[label] || (local && local.uploaded.includes(label) ? slug(label) + '-resubmitted.pdf' : '');
+  const contractFile = (app, label) => app.reqContracts[label] || '';
 
   /* ---------- Review items: what a case holds, each approved or rejected on its own ---------- */
   const slotsOf = n => DOCS[n].slots || ['File'];
@@ -221,13 +221,15 @@
     app.order.filter(id => chOf(id) === ch).forEach(id => {
       const s = app.svc[id], banks = s.lines.map(l => l.bank).filter(Boolean), g = 'svc:' + id;
       // A PF service can't be approved without its signed contract attached.
-      const con = contractFor(app, id), noCon = !!con && !contractFile(app, con, local), short = con ? 'Pricing and contract' : 'Pricing';
-      out.push({ key: 'svc:' + id, group: g, svc: id, label: nmOf(id) + ' · ' + short, short, sub: `${s.model}${banks.length ? ' · ' + banks.join(', ') : ''}`, contract: con, missing: noCon, why: `The ${con} is not attached` });
+      const con = contractFor(app, id), short = con ? 'Pricing and contract' : 'Pricing';
+      out.push({ key: 'svc:' + id, group: g, svc: id, label: nmOf(id) + ' · ' + short, short, sub: `${s.model}${banks.length ? ' · ' + banks.join(', ') : ''}`, contract: con });
       docsFor(app, [id]).forEach((rules, n) => out.push({ key: `sdoc:${id}|${n}`, group: g, svc: id, doc: n, label: nmOf(id) + ' · ' + n, short: n, sub: rules.join(', '), missing: !has(n), why: 'Not uploaded',
         also: app.order.filter(x => x !== id && chOf(x) === ch && docsFor(app, [x]).has(n)).map(nmOf) }));
     });
+    /* The sales application can't be submitted without a valid website or social media link for Online services, a store image
+       and the terminals for POS services, and the signed contract of every PF service: they always arrive, Underwriting judges them. */
     if (ch === 'Online') out.push({ key: 'web', group: 'setup', label: 'Website and social media links', sub: app.websites.length + ' link' + (app.websites.length === 1 ? '' : 's') });
-    if (ch === 'POS') out.push({ key: 'pos', group: 'setup', label: 'POS terminals and store image', sub: `${app.terminals} terminal${app.terminals === 1 ? '' : 's'}`, missing: !(app.storeImage || extra.includes('Store Image')), why: 'The store image was not uploaded' });
+    if (ch === 'POS') out.push({ key: 'pos', group: 'setup', label: 'POS terminals and store image', sub: `${app.terminals} terminal${app.terminals === 1 ? '' : 's'}` });
     if (app.payouts.length) out.push({ key: 'payout', group: 'payout', label: 'Payout methods', sub: app.payouts.length + ' method' + (app.payouts.length === 1 ? '' : 's') });
     return out;
   }
@@ -371,8 +373,6 @@
     keys.forEach(k => {
       delete c.local.review[k];
       if (k.startsWith('sdoc:')) c.local.uploaded.push(k.slice(k.indexOf('|') + 1));
-      if (k.startsWith('svc:')) { const con = contractFor(c.app, k.slice(4)); if (con && !contractFile(c.app, con, c.local)) c.local.uploaded.push(con); }
-      if (k === 'pos') c.local.uploaded.push('Store Image');
     });
     c.local.status = 'New'; c.local.returned = null;
     c.local.events.unshift({ t: nowISO(), who: c.app.sales, text: 'resubmitted the case with the requested changes', ic: 'send', detail: keys.length + ' item' + (keys.length === 1 ? '' : 's') + ' to review again' });

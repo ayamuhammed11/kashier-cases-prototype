@@ -168,7 +168,7 @@
       if (i.doc) UW.docFiles(c.app, i.doc, c).forEach(n => add(n, i.doc));
       if (i.contract) add(UW.contractFile(c.app, i.contract, c.local), i.contract);
     });
-    if (c.ch === 'POS') add(c.app.storeImage || (c.local.uploaded.includes('Store Image') ? 'store-image-resubmitted.jpg' : ''), 'Store Image');
+    if (c.ch === 'POS') add(c.app.storeImage, 'Store Image');
     return out;
   }
   function merchantSec(c, list) {
@@ -199,7 +199,7 @@
     const a = c.app, i = list[0];
     const body = c.ch === 'Online'
       ? `<div class="links">${a.websites.map(w => `<a href="https://${esc(w.replace(/^https?:\/\//, ''))}" target="_blank" rel="noopener">${icon('globe', 'ic-16')}${esc(w)}${icon('ext', 'ic-14')}</a>`).join('')}</div><p class="hint" style="margin:0">Check that the links show what the merchant sells, with prices, contact details and a refund policy.</p>`
-      : `<dl class="dl"><dt>POS terminals</dt><dd>${a.terminals}</dd><dt>Store image</dt><dd>${a.storeImage || c.local.uploaded.includes('Store Image') ? `<div class="files">${fileBtn(a.storeImage || 'store-image-resubmitted.jpg', 'Store Image', 'pos')}</div>` : '<span class="flag h">' + icon('warn', 'ic-14') + 'Not uploaded</span>'}</dd></dl>`;
+      : `<dl class="dl"><dt>POS terminals</dt><dd>${a.terminals}</dd><dt>Store image</dt><dd><div class="files">${fileBtn(a.storeImage, 'Store Image', 'pos')}</div></dd></dl>`;
     return `<section class="card sec" id="s-setup" aria-labelledby="s-setupH">${secHead('s-setup', c.ch === 'Online' ? 'Online setup' : 'POS setup', list, c.ch === 'Online' ? 'Where the merchant sells online.' : 'The terminals requested and the store the bank will visit.')}<div class="rvs">${rv(c, i, body)}</div></section>`;
   }
   function payoutSec(c, list) {

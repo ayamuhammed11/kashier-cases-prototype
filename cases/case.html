@@ -69,11 +69,12 @@
   .fbtn:active { background: var(--primary-10); }
   .links { display: flex; flex-direction: column; gap: 6px; }
   .links a { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; overflow-wrap: anywhere; }
-  .pays { display: grid; gap: 12px; grid-template-columns: 1fr; }
-  @media (min-width: 768px) { .pays { grid-template-columns: 1fr 1fr; } }
+  /* payout methods fill the frame: one method takes the full width, two or more share it, and they stack when narrow */
+  .pays { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
   .pay { border: 1px solid var(--border-subtle); background: var(--bg); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; min-width: 0; }
   .pay b { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 14px; }
-  .pay .dl { grid-template-columns: minmax(120px, auto) 1fr; gap: 6px 12px; margin-block-start: 4px; }
+  .pay .dl { grid-template-columns: minmax(120px, max-content) minmax(0, 1fr); gap: 6px 16px; margin-block-start: 4px; }
+  .pay .dl dd { overflow-wrap: anywhere; }
   .pay .dl dd { font-weight: 600; }
 
   /* aside */
@@ -107,6 +108,8 @@
   .pv { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); min-height: 320px; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--cadet-base); }
   .pv .ei { width: 56px; height: 56px; border-radius: 50%; background: var(--primary-10); color: var(--primary); display: grid; place-items: center; margin: 0 auto 12px; }
   .btn[aria-disabled="true"] { opacity: .5; }
+  /* a case returned to Sales is read-only: its content is dimmed until Sales resubmits it */
+  .cgrid.dim .cmain, .cgrid.dim .caside .acard:first-child { opacity: .55; }
   @media (pointer: coarse) { .ck button, .fbtn { min-height: 44px; } }
 </style>
 </head>
@@ -186,7 +189,7 @@
       const con = pricing.contract ? (() => { const f = UW.contractFile(c.app, pricing.contract, c.local); return `<div class="svc-con"><span class="k">Contract</span>${f ? `<div class="files">${fileBtn(f, pricing.contract, pricing.key)}</div><span class="hint">${esc(pricing.contract)}${pricing.contract === 'Kashier PF Contract' ? ' · covers Card, Wallet, Bank Installments and Basata' : ''}</span>` : `<span class="flag h">${icon('warn', 'ic-14')}The ${esc(pricing.contract)} is not attached</span>`}</div>`; })() : '';
       const pBody = `<div class="rscroll"><table class="rtbl"><thead><tr>${banked ? '<th>Bank</th>' : ''}<th>Rate type</th><th>Requested</th><th>Published</th><th>Rate approval</th></tr></thead><tbody>${rows}</tbody></table></div>${con}
         <div class="svc-opts"><span>Model <b>${esc(s.model)}</b></span><span>Currencies <b>${s.currencies.map(esc).join(', ')}</b></span>${s.ops.length ? `<span>Operations <b>${s.ops.map(esc).join(', ')}</b></span>` : ''}</div>`;
-      const dBody = d => { const f = UW.docFiles(c.app, d.doc, c); return f.length ? `<div class="files">${f.map(n => fileBtn(n, d.doc, d.key)).join('')}</div>` : ''; };
+      const dBody = d => { const f = UW.docFiles(c.app, d.doc, c); return (f.length ? `<div class="files">${f.map(n => fileBtn(n, d.doc, d.key)).join('')}</div>` : '') + (d.also.length && !d.missing ? `<span class="hint">${icon('link', 'ic-14')} Also required for ${d.also.map(esc).join(', ')}. Your decision here applies there too.</span>` : ''); };
       const sub = [c.ch + ' service', UW.SVC_HINT[UW.nmOf(id)], banks.join(', ')].filter(Boolean).join(' · ');
       return `<section class="card sec" id="${sid}" aria-labelledby="${sid}H">${secHead(sid, `${esc(UW.nmOf(id))} <span class="tag">${esc(s.model)}</span>`, items, esc(sub))}
         <div class="rvs">${rv(c, pricing, pBody)}${docs.length ? `<h3 class="sub-h">Required documents (${docs.length})</h3>` : ''}${docs.map(d => rv(c, d, dBody(d), ` <span class="ar">· <bdi lang="ar">${UW.DOCS[d.doc].ar}</bdi></span>`)).join('')}</div></section>`;
@@ -220,19 +223,18 @@
   function actions(c) {
     const m = UW.me(), out = [], files = caseFiles(c).length;
     if (files) out.push(`<button type="button" class="btn btn-outline" data-act="cDlAll" title="Every document, signed contract and the store image of this case, as one zip">${icon('download', 'ic')}Download all documents (${files})</button>`);
-    if (m.manager && ['New', 'In Review', 'Returned to Sales'].includes(c.status)) out.push(`<button type="button" class="btn btn-outline" data-act="cAssign" aria-haspopup="menu">${icon('userplus', 'ic')}Reassign</button>`);
+    if (m.manager && ['New', 'Returned to Sales'].includes(c.status)) out.push(`<button type="button" class="btn btn-outline" data-act="cAssign" aria-haspopup="menu">${icon('userplus', 'ic')}Reassign</button>`);
     // Return to Sales shows once an item is rejected or missing; Approve case needs every item approved.
-    if (UW.canReview(c)) { const p = UW.progress(c); out.push(`${p.flagged.length ? `<button type="button" class="btn btn-outline-danger" data-act="cReturn">${icon('uturn', 'ic')}Return to Sales</button>` : ''}<button type="button" class="btn btn-primary" data-act="cApprove" aria-disabled="${!p.ready}">${icon('tick', 'ic', 2)}Approve case</button>`); }
+    if (UW.canReview(c)) { const p = UW.progress(c); out.push(`${p.flagged.length ? `<button type="button" class="btn btn-outline-danger" data-act="cReturn" aria-disabled="${!UW.canReturn(c)}">${icon('uturn', 'ic')}Return to Sales</button>` : ''}<button type="button" class="btn btn-primary" data-act="cApprove" aria-disabled="${!p.ready}">${icon('tick', 'ic', 2)}Approve case</button>`); }
     return out.length ? `<div class="ph-row">${out.join('')}</div>` : '';
   }
   function banner(c) {
     const p = UW.progress(c), L = c.local;
-    if (c.status === 'New' && UW.canReview(c)) return `<div class="banner">${icon('user', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)} by round robin on ${UW.fmtDT(c.app.submittedAt)}</b><p>Not started yet. It moves to In Review with the first item approved or rejected.</p></div></div>`;
-    if (c.status === 'New') return `<div class="banner">${icon('info', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)}. View only.</b><p>Only the assignee or the Underwriting Manager can review this case.</p></div></div>`;
-    if (c.status === 'In Review' && !UW.canReview(c)) return `<div class="banner">${icon('info', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)}. View only.</b><p>Only the assignee or the Underwriting Manager can review this case.${p.flagged.length ? ' ' + p.flagged.length + ' item' + (p.flagged.length === 1 ? ' is' : 's are') + ' rejected or missing.' : ''}</p></div></div>`;
-    if (c.status === 'In Review' && p.flagged.length) return `<div class="banner warn">${icon('xcircle', 'ic-20')}<div><b>${p.flagged.length} item${p.flagged.length === 1 ? '' : 's'} rejected or missing</b><p>The case can't be approved while an item is rejected or missing. Undo a rejection once it is resolved, or return the case to Sales: they get every rejected item with its reason.</p></div></div>`;
-    if (c.status === 'In Review' && p.ready) return `<div class="banner ok">${icon('check', 'ic-20')}<div><b>Every item is approved</b><p>Approve the case to approve the ${c.ch} services.</p></div></div>`;
-    if (c.status === 'Returned to Sales') { const r = L.returned; return `<div class="banner rj-banner">${icon('uturn', 'ic-20')}<div><b>Returned to Sales by ${esc(r.by)} on ${UW.fmtDT(r.at)}</b><p>${r.items.length} rejected item${r.items.length === 1 ? '' : 's'} to fix:</p>
+    if (c.status === 'New' && !UW.canReview(c)) return `<div class="banner">${icon('info', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)}. View only.</b><p>Only the assignee or the Underwriting Manager can review this case.${p.flagged.length ? ' ' + p.flagged.length + ' item' + (p.flagged.length === 1 ? ' is' : 's are') + ' rejected or missing.' : ''}</p></div></div>`;
+    if (c.status === 'New' && p.flagged.length) return `<div class="banner warn">${icon('xcircle', 'ic-20')}<div><b>${p.flagged.length} item${p.flagged.length === 1 ? '' : 's'} rejected or missing</b><p>The case can't be approved while an item is rejected or missing. Undo a rejection once it is resolved, or return the case to Sales: they get every rejected item with its reason.</p></div></div>`;
+    if (c.status === 'New' && p.ready) return `<div class="banner ok">${icon('check', 'ic-20')}<div><b>Every item is approved</b><p>Approve the case to approve the ${c.ch} services.</p></div></div>`;
+    if (c.status === 'New' && !p.done) return `<div class="banner">${icon('user', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)} by round robin on ${UW.fmtDT(c.app.submittedAt)}</b><p>Review every service, then approve the case or return it to Sales. It stays New until then.</p></div></div>`;
+    if (c.status === 'Returned to Sales') { const r = L.returned; return `<div class="banner rj-banner">${icon('uturn', 'ic-20')}<div><b>Returned to Sales by ${esc(r.by)} on ${UW.fmtDT(r.at)}</b><p>View only until Sales resubmits it.</p>${r.feedback ? `<p><b style="display:inline;color:var(--foreground)">Feedback:</b> ${esc(r.feedback)}</p>` : ''}<p>${r.items.length} rejected item${r.items.length === 1 ? '' : 's'} to fix:</p>
       <ul class="rj">${r.items.map(it => `<li>${icon('xcircle', 'ic-14')}<span><b style="display:inline;color:var(--foreground)">${esc(it.label)}:</b> ${esc(it.reason)}</span></li>`).join('')}</ul>
       <p style="margin-top:12px"><button type="button" class="btn btn-outline btn-sm" data-act="cResubmit">${icon('send', 'ic-16')}Simulate the Sales resubmission</button> <span class="proto-note">Prototype only</span></p></div></div>`; }
     if (c.status === 'Approved') return `<div class="banner ok">${icon('check', 'ic-20')}<div><b>Approved by ${esc(L.approved.by)} on ${UW.fmtDT(L.approved.at)}</b><p>The ${c.ch} services are approved.${L.approved.comment ? ' Comment: ' + esc(L.approved.comment) : ''} Underwriting's part of this case is done.</p></div></div>`;
@@ -241,7 +243,7 @@
   function tracking(c) {
     const L = c.local, ret = c.status === 'Returned to Sales';
     const steps = [['Submitted', `${UW.fmtDate(c.app.submittedAt)} · ${esc(c.app.sales)}`], [ret ? 'Returned to Sales' : 'Underwriting review', ret ? UW.fmtDate(L.returned.at) : esc(c.assignee)], ['Approved', L.approved ? `${UW.fmtDate(L.approved.at)} · ${esc(L.approved.by)}` : '']];
-    const cur = { New: 1, 'In Review': 1, 'Returned to Sales': 1, Approved: 3 }[c.status];
+    const cur = { New: 1, 'Returned to Sales': 1, Approved: 3 }[c.status];
     return `<div class="card sec"><h2 class="sub-h" style="font-size:16px">Case tracking</h2><ol class="track">${steps.map(([s, h], i) => `<li class="${i < cur ? 'done' : i === cur ? 'now' : ''}"><span class="d" ${ret && i === 1 ? 'style="border-color:var(--destructive);color:var(--destructive)"' : ''}>${i < cur ? icon('tick', 'ic-14', 2.5) : i + 1}</span><b>${s}</b><span class="hint">${h}</span></li>`).join('')}</ol></div>`;
   }
   function aside(c) {
@@ -297,14 +299,18 @@
       } });
   }
   function openReturn(c) {
-    const p = UW.progress(c);
-    if (!p.flagged.length) return;
-    SA.modal({ title: 'Return to Sales?', sub: `${esc(c.app.sales)} gets the ${c.ch} case of <b>${esc(c.app.biz)}</b> back with ${p.flagged.length === 1 ? 'the rejected item and its reason' : `the ${p.flagged.length} rejected items and their reasons`}.`,
-      body: `<ul class="rj" style="margin:0">${p.flagged.map(i => `<li>${icon('xcircle', 'ic-14')}<span><b style="color:var(--foreground)">${esc(i.label)}:</b> ${esc(i.reason)}</span></li>`).join('')}</ul>`,
-      foot: '<button type="button" class="btn btn-outline" data-n>Cancel</button><button type="button" class="btn btn-danger" data-y>Return to Sales</button>',
+    const rej = UW.rejectedItems(c), p = UW.progress(c), left = p.list.filter(i => i.state === 'todo');
+    if (!rej.length) return;
+    if (left.length) { SA.toast(`Review the ${left.length} remaining item${left.length === 1 ? '' : 's'} first: every item is approved or rejected before the case goes back to Sales`); jump(left[0].key); return; }
+    SA.modal({ title: 'Return to Sales?', sub: `${esc(c.app.sales)} gets the ${c.ch} case of <b>${esc(c.app.biz)}</b> back with ${rej.length === 1 ? 'the rejected item and its reason' : `the ${rej.length} rejected items and their reasons`}.`,
+      body: `<ul class="rj" style="margin:0">${rej.map(i => `<li>${icon('xcircle', 'ic-14')}<span><b style="color:var(--foreground)">${esc(i.label)}:</b> ${esc(i.reason)}</span></li>`).join('')}</ul>
+        <div class="fld"><label for="rfb">Feedback to Sales</label><textarea class="inp" id="rfb" rows="3" placeholder="What Sales should do next, and anything that is already fine"></textarea><span class="hint">Required. Sent with the rejected items and saved in the activity log.</span></div>`,
+      foot: '<button type="button" class="btn btn-outline" data-n>Cancel</button><button type="button" class="btn btn-danger" data-y disabled>Return to Sales</button>',
       bind(api) {
+        const t = api.el.querySelector('#rfb'), y = api.el.querySelector('[data-y]');
+        t.oninput = () => { y.disabled = !t.value.trim(); };
         api.el.querySelector('[data-n]').onclick = api.close;
-        api.el.querySelector('[data-y]').onclick = () => { UW.returnToSales(c); api.close(); scrollTo(0, 0); SA.rerender(); SA.toast(`${c.id} returned to ${c.app.sales}`); };
+        y.onclick = () => { UW.returnToSales(c, t.value); api.close(); scrollTo(0, 0); SA.rerender(); SA.toast(`${c.id} returned to ${c.app.sales}`); };
       } });
   }
   function jump(key) {
@@ -328,7 +334,7 @@
       if (!c) { page.innerHTML = `<div class="wrap"><div class="card"><div class="empty"><span class="ei">${icon('docsearch', 'ic-24')}</span><h3>This case does not exist</h3><p>Check the case ID, or find the case in the Cases list.</p><a class="btn btn-outline btn-sm" href="index.html">Back to Cases</a></div></div></div>`; return; }
       const list = UW.items(c), of = g => list.filter(i => i.group === g);
       page.innerHTML = `<div class="wrap"><div class="ph">${header(c)}${actions(c)}</div>${banner(c)}${tracking(c)}
-        <div class="cgrid"><div class="cmain">${merchantSec(c, of('merchant'))}${servicesSec(c, list)}${setupSec(c, of('setup'))}${payoutSec(c, of('payout'))}</div>${aside(c)}</div></div>`;
+        <div class="cgrid ${c.status === 'Returned to Sales' ? 'dim' : ''}"><div class="cmain">${merchantSec(c, of('merchant'))}${servicesSec(c, list)}${setupSec(c, of('setup'))}${payoutSec(c, of('payout'))}</div>${aside(c)}</div></div>`;
     },
     act: {
       cLog: () => { openLog(cur()); return false; },

@@ -170,26 +170,27 @@
   const APPS = SEED.map(buildApp);
 
   /* ---------- Cases ---------- */
-  const STATUSES = ['New', 'In Review', 'Returned to Sales', 'Approved'];
-  const CHIP = { New: 'info', 'In Review': 'warn', 'Returned to Sales': 'bad', Approved: 'ok' };
+  /* A case is New from the moment it opens until Underwriting approves it or returns it to Sales: reviewing it doesn't move it. */
+  const STATUSES = ['New', 'Returned to Sales', 'Approved'];
+  const CHIP = { New: 'info', 'Returned to Sales': 'bad', Approved: 'ok' };
   const CH_CODE = { Online: 'ONL', POS: 'POS' };
   const caseId = (app, ch) => `UW-${app.n}-${CH_CODE[ch]}`;
 
   /* Where the seeded cases stand. verify: 'all' or a share of the items (0-1); flags: { itemKey: reason }. */
   const CASE_SEED = {
-    'UW-1040-ONL': { status: 'In Review', assignee: 'Rana Adel', verify: 0.5, at: '2026-10-22T09:00:00' },
+    'UW-1040-ONL': { status: 'New', assignee: 'Rana Adel', verify: 0.5, at: '2026-10-22T09:00:00' },
     'UW-1040-POS': { status: 'New' },
     'UW-1041-POS': { status: 'New' },
     'UW-1042-ONL': { status: 'Approved', assignee: 'Omar Hassan', verify: 'all', at: '2026-10-15T10:00:00', approved: { by: 'Omar Hassan', at: '2026-10-16T15:30:00', comment: 'All clear.' } },
-    'UW-1042-POS': { status: 'In Review', assignee: 'Rana Adel', verify: 0.6, at: '2026-10-15T11:00:00', flags: { 'doc:Store Lease / Location Proof': 'The lease expired in August 2026. Ask for the renewed lease.' } },
-    'UW-1043-ONL': { status: 'Returned to Sales', assignee: 'Rana Adel', verify: 0.7, at: '2026-10-18T09:30:00', returned: { by: 'Rana Adel', at: '2026-10-19T12:10:00', reason: 'The Tax Identification Card is required for a Professional Business. Upload it and resubmit.', items: ['doc:Tax Identification Card'] } },
-    'UW-1044-ONL': { status: 'In Review', assignee: 'Omar Hassan', verify: 0.3, at: '2026-10-23T10:00:00' },
-    'UW-1044-POS': { status: 'In Review', assignee: 'Omar Hassan', verify: 0.2, at: '2026-10-23T10:05:00', flags: { "doc:Owner's Residence Card": 'The residence card photo is blurred; the expiry date cannot be read.' } },
+    'UW-1042-POS': { status: 'New', assignee: 'Rana Adel', verify: 0.6, at: '2026-10-15T11:00:00', flags: { 'doc:Store Lease / Location Proof': 'The lease expired in August 2026. Ask for the renewed lease.' } },
+    'UW-1043-ONL': { status: 'Returned to Sales', assignee: 'Rana Adel', verify: 'all', at: '2026-10-18T09:30:00', returned: { by: 'Rana Adel', at: '2026-10-19T12:10:00', feedback: 'Everything else is in order. Once the tax card is uploaded the case can be approved the same day.', reason: 'The Tax Identification Card is required for a Professional Business. Upload it and resubmit.', items: ['doc:Tax Identification Card'] } },
+    'UW-1044-ONL': { status: 'New', assignee: 'Omar Hassan', verify: 0.3, at: '2026-10-23T10:00:00' },
+    'UW-1044-POS': { status: 'New', assignee: 'Omar Hassan', verify: 0.2, at: '2026-10-23T10:05:00', flags: { "doc:Owner's Residence Card": 'The residence card photo is blurred; the expiry date cannot be read.' } },
     'UW-1045-POS': { status: 'New' },
-    'UW-1047-ONL': { status: 'In Review', assignee: 'Salma Nabil', verify: 0.1, at: '2026-10-26T09:20:00' },
-    'UW-1048-ONL': { status: 'In Review', assignee: 'Rana Adel', verify: 'all', at: '2026-10-21T09:00:00' },
-    'UW-1048-POS': { status: 'In Review', assignee: 'Rana Adel', verify: 0.4, at: '2026-10-21T09:10:00' },
-    'UW-1049-ONL': { status: 'Returned to Sales', assignee: 'Salma Nabil', verify: 0.5, at: '2026-10-13T09:00:00', returned: { by: 'Salma Nabil', at: '2026-10-14T16:20:00', reason: 'The Facebook page does not show the spice products or prices. Add the website or a page that shows what the merchant sells.', items: ['web'] } },
+    'UW-1047-ONL': { status: 'New', assignee: 'Salma Nabil', verify: 0.1, at: '2026-10-26T09:20:00' },
+    'UW-1048-ONL': { status: 'New', assignee: 'Rana Adel', verify: 'all', at: '2026-10-21T09:00:00' },
+    'UW-1048-POS': { status: 'New', assignee: 'Rana Adel', verify: 0.4, at: '2026-10-21T09:10:00' },
+    'UW-1049-ONL': { status: 'Returned to Sales', assignee: 'Salma Nabil', verify: 'all', at: '2026-10-13T09:00:00', returned: { by: 'Salma Nabil', at: '2026-10-14T16:20:00', feedback: 'The POS case is approved. The Online case only needs a link that shows the products and prices.', reason: 'The Facebook page does not show the spice products or prices. Add the website or a page that shows what the merchant sells.', items: ['web'] } },
     'UW-1049-POS': { status: 'Approved', assignee: 'Salma Nabil', verify: 'all', at: '2026-10-13T09:05:00', approved: { by: 'Salma Nabil', at: '2026-10-14T16:30:00', comment: '' } },
     'UW-1050-ONL': { status: 'New' },
   };
@@ -222,7 +223,8 @@
       // A PF service can't be approved without its signed contract attached.
       const con = contractFor(app, id), noCon = !!con && !contractFile(app, con, local), short = con ? 'Pricing and contract' : 'Pricing';
       out.push({ key: 'svc:' + id, group: g, svc: id, label: nmOf(id) + ' · ' + short, short, sub: `${s.model}${banks.length ? ' · ' + banks.join(', ') : ''}`, contract: con, missing: noCon, why: `The ${con} is not attached` });
-      docsFor(app, [id]).forEach((rules, n) => out.push({ key: `sdoc:${id}|${n}`, group: g, svc: id, doc: n, label: nmOf(id) + ' · ' + n, short: n, sub: rules.join(', '), missing: !has(n), why: 'Not uploaded' }));
+      docsFor(app, [id]).forEach((rules, n) => out.push({ key: `sdoc:${id}|${n}`, group: g, svc: id, doc: n, label: nmOf(id) + ' · ' + n, short: n, sub: rules.join(', '), missing: !has(n), why: 'Not uploaded',
+        also: app.order.filter(x => x !== id && chOf(x) === ch && docsFor(app, [x]).has(n)).map(nmOf) }));
     });
     if (ch === 'Online') out.push({ key: 'web', group: 'setup', label: 'Website and social media links', sub: app.websites.length + ' link' + (app.websites.length === 1 ? '' : 's') });
     if (ch === 'POS') out.push({ key: 'pos', group: 'setup', label: 'POS terminals and store image', sub: `${app.terminals} terminal${app.terminals === 1 ? '' : 's'}`, missing: !(app.storeImage || extra.includes('Store Image')), why: 'The store image was not uploaded' });
@@ -238,6 +240,12 @@
     items.slice(0, n).forEach(i => { review[i.key] = { state: 'ok', by, at }; });
     Object.entries(sd.flags || {}).forEach(([k, reason]) => expand(app, ch, k).forEach(x => { review[x] = { state: 'flag', reason, by, at }; }));
     if (sd.returned) sd.returned.items.forEach(k => expand(app, ch, k).forEach(x => { review[x] = { state: 'flag', reason: sd.returned.reason, by: sd.returned.by, at: sd.returned.at }; }));
+    // The same document carries one decision under every service: a rejection wins over an approval.
+    const all = rawItems(app, ch, null).filter(i => i.doc && !i.missing);
+    [...new Set(all.map(i => i.doc))].forEach(n => {
+      const ks = all.filter(i => i.doc === n).map(i => i.key), d = ks.map(k => review[k]).find(r => r && r.state === 'flag') || ks.map(k => review[k]).find(r => r && r.state === 'ok');
+      ks.forEach(k => { if (d) review[k] = Object.assign({}, d); else delete review[k]; });
+    });
     return review;
   }
   function seedEvents(app, ch, sd) {
@@ -245,15 +253,25 @@
     if (sd.assignee) ev.push({ t: app.submittedAt, who: 'System', text: 'assigned the case to ' + sd.assignee + ' (round robin)', ic: 'user' });
     const fl = Object.entries(sd.flags || {});
     fl.forEach(([k, r]) => ev.push({ t: sd.at, who: sd.assignee, text: 'rejected ' + k.replace(/^\w+:/, ''), ic: 'xcircle', detail: r }));
-    if (sd.returned) ev.push({ t: sd.returned.at, who: sd.returned.by, text: 'returned the case to Sales', ic: 'uturn', detail: sd.returned.reason });
+    if (sd.returned) ev.push({ t: sd.returned.at, who: sd.returned.by, text: 'returned the case to Sales', ic: 'uturn', detail: 'Feedback: ' + sd.returned.feedback + ' · ' + sd.returned.reason });
     if (sd.approved) ev.push({ t: sd.approved.at, who: sd.approved.by, text: 'approved the case', ic: 'check', detail: sd.approved.comment });
     return ev.reverse();
+  }
+  /* A seeded return lists each item once; a document several services require is named once, with its services. */
+  function seedReturned(app, ch, sd) {
+    const raw = rawItems(app, ch, null), out = [];
+    [].concat(...sd.returned.items.map(k => expand(app, ch, k))).forEach(k => {
+      const i = raw.find(x => x.key === k) || { key: k, label: k }, same = i.doc && out.find(o => o.doc === i.doc);
+      if (same) { same.svcs.push(nmOf(i.svc)); same.label = `${i.doc} (${same.svcs.join(', ')})`; return; }
+      out.push({ key: k, doc: i.doc || '', svcs: i.doc ? [nmOf(i.svc)] : [], label: i.label, reason: sd.returned.reason });
+    });
+    return out.map(o => ({ key: o.key, label: o.label, reason: o.reason }));
   }
   function local(id, app, ch) {
     if (!STATE[id]) {
       const sd = CASE_SEED[id] || { status: 'New' };
       STATE[id] = { status: sd.status, assignee: sd.assignee || '', review: seedReview(app, ch, sd), events: seedEvents(app, ch, sd), approved: sd.approved || null, uploaded: [],
-        returned: sd.returned ? { by: sd.returned.by, at: sd.returned.at, items: [].concat(...sd.returned.items.map(k => expand(app, ch, k))).map(k => ({ key: k, label: (rawItems(app, ch, null).find(i => i.key === k) || { label: k }).label, reason: sd.returned.reason })) } : null };
+        returned: sd.returned ? { by: sd.returned.by, at: sd.returned.at, feedback: sd.returned.feedback || '', items: seedReturned(app, ch, sd) } : null };
     }
     return STATE[id];
   }
@@ -298,16 +316,19 @@
   }
   const isMine = c => c.assignee === me().name;
   /* New means assigned but not started: the first item reviewed starts it. */
-  const canReview = c => (c.status === 'New' || c.status === 'In Review') && (isMine(c) || me().manager);
-  const start = c => { if (c.local.status === 'New') { c.local.status = 'In Review'; c.status = 'In Review'; } };
+  const canReview = c => c.status === 'New' && (isMine(c) || me().manager);
 
   /* ---------- Actions ---------- */
   const addEvent = (c, text, ic, detail) => { c.local.events.unshift({ t: nowISO(), who: me().name, text, ic, detail: detail || '' }); };
   const commit = c => { STATE[c.id] = c.local; persist(); };
+  /* A document several services require is one file: approving, rejecting or undoing it under one service applies to it under
+     every service of the case that requires it. */
+  const sameDoc = (c, key) => { if (!key.startsWith('sdoc:')) return [key]; const n = key.slice(key.indexOf('|') + 1); return rawItems(c.app, c.ch, c.local).filter(i => i.doc === n && !i.missing).map(i => i.key); };
   function setReview(c, key, state, reason, label) {
-    start(c);
-    if (state === 'todo') delete c.local.review[key]; else c.local.review[key] = { state, reason: reason || '', by: me().name, at: nowISO() };
-    addEvent(c, state === 'ok' ? 'approved ' + label : state === 'flag' ? 'rejected ' + label : 'undid the review of ' + label, state === 'ok' ? 'check' : state === 'flag' ? 'xcircle' : 'retry', state === 'flag' ? reason : '');
+    const keys = sameDoc(c, key), r = { state, reason: reason || '', by: me().name, at: nowISO() };
+    keys.forEach(k => { if (state === 'todo') delete c.local.review[k]; else c.local.review[k] = Object.assign({}, r); });
+    const what = keys.length > 1 ? `${key.slice(key.indexOf('|') + 1)} for ${keys.map(k => nmOf(k.slice(5, k.indexOf('|')))).join(', ')}` : label;
+    addEvent(c, state === 'ok' ? 'approved ' + what : state === 'flag' ? 'rejected ' + what : 'undid the review of ' + what, state === 'ok' ? 'check' : state === 'flag' ? 'xcircle' : 'retry', state === 'flag' ? reason : '');
     commit(c);
   }
   /* Only the Underwriting Manager reassigns; the case keeps its status and its review. */
@@ -324,11 +345,23 @@
     commit(c);
   }
   /* Return to Sales: possible once an item is rejected (or missing). Sales gets every rejected item with the reason given when it was rejected. */
-  function returnToSales(c) {
-    const rej = progress(c).flagged.map(i => ({ key: i.key, label: i.label, reason: i.reason }));
-    if (!rej.length) return;
-    c.local.status = 'Returned to Sales'; c.local.returned = { by: me().name, at: nowISO(), items: rej };
-    addEvent(c, 'returned the case to Sales', 'uturn', rej.map(i => i.label + ': ' + i.reason).join(' · '));
+  /* What Sales gets back: each rejected item once, a document shared by several services named once with its services. */
+  function rejectedItems(c) {
+    const out = [];
+    progress(c).flagged.forEach(i => {
+      const same = i.doc && out.find(o => o.doc === i.doc && o.reason === i.reason);
+      if (same) { same.svcs.push(nmOf(i.svc)); same.label = `${i.doc} (${same.svcs.join(', ')})`; return; }
+      out.push({ key: i.key, doc: i.doc || '', svcs: i.doc ? [nmOf(i.svc)] : [], label: i.label, reason: i.reason });
+    });
+    return out.map(o => ({ key: o.key, label: o.label, reason: o.reason }));
+  }
+  /* A case goes back to Sales only once every item is reviewed (approved or rejected) and at least one is rejected, with feedback. */
+  const canReturn = c => { const p = progress(c); return p.flagged.length > 0 && p.list.every(i => i.state !== 'todo'); };
+  function returnToSales(c, feedback) {
+    const rej = rejectedItems(c);
+    if (!rej.length || !canReturn(c) || !(feedback || '').trim()) return;
+    c.local.status = 'Returned to Sales'; c.local.returned = { by: me().name, at: nowISO(), feedback: feedback.trim(), items: rej };
+    addEvent(c, 'returned the case to Sales', 'uturn', 'Feedback: ' + feedback.trim() + ' · ' + rej.map(i => i.label + ': ' + i.reason).join(' · '));
     commit(c);
   }
   /* Prototype only: Sales fixes what was returned and resubmits. The returned items come back unreviewed, missing files arrive. */
@@ -341,7 +374,7 @@
       if (k.startsWith('svc:')) { const con = contractFor(c.app, k.slice(4)); if (con && !contractFile(c.app, con, c.local)) c.local.uploaded.push(con); }
       if (k === 'pos') c.local.uploaded.push('Store Image');
     });
-    c.local.status = 'In Review'; c.local.returned = null;
+    c.local.status = 'New'; c.local.returned = null;
     c.local.events.unshift({ t: nowISO(), who: c.app.sales, text: 'resubmitted the case with the requested changes', ic: 'send', detail: keys.length + ' item' + (keys.length === 1 ? '' : 's') + ' to review again' });
     commit(c);
   }
@@ -358,7 +391,7 @@
   window.UW = {
     PAGES,
     TODAY, USERS, AGENTS, STATUSES, CHIP, DOCS, me, setMe, initials, icon, chip, chTag, svcLabel, chOf, nmOf, isCard, SVC_HINT,
-    all, get, siblings, items, progress, canReview, isMine, setReview, reassign, approve, returnToSales, resubmit, resetAll,
+    all, get, siblings, items, progress, rejectedItems, canReturn, canReview, isMine, setReview, reassign, approve, returnToSales, resubmit, resetAll,
     fmtDate, fmtDT, daysSince, docFiles, contractFile, slug
   };
 })();

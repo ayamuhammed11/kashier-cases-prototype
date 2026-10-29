@@ -43,9 +43,8 @@
     return `<span class="svcs" title="${esc(n.join(', '))}">${show.map(x => `<span class="tag">${esc(x)}</span>`).join('')}${n.length > 3 ? `<span class="tag">+${n.length - 3}</span>` : ''}</span>`;
   }
   function secondLine(c) {
-    if (c.status === 'New') return `<span class="sub2 m">Not started · assigned ${UW.daysSince(c.app.submittedAt)} day${UW.daysSince(c.app.submittedAt) === 1 ? '' : 's'} ago</span>`;
-    if (c.status === 'In Review') { const p = UW.progress(c); return p.flagged.length ? `<span class="sub2 h">${p.done} of ${p.total} approved · ${p.flagged.length} rejected</span>` : p.ready ? '<span class="sub2 ok">Every item approved · ready to approve the case</span>' : `<span class="sub2">${p.done} of ${p.total} approved</span>`; }
-    if (c.status === 'Returned to Sales') { const it = c.local.returned.items, t = it.map(i => i.label + ': ' + i.reason).join(' · '); return `<span class="sub2 h" title="${esc(t)}">${it.length > 1 ? it.length + ' items rejected · ' : ''}${esc(it[0].label)}: ${esc(it[0].reason)}</span>`; }
+    if (c.status === 'New') { const p = UW.progress(c); if (!p.done && !p.flagged.some(i => !i.auto)) return `<span class="sub2 m">Not started · assigned ${UW.daysSince(c.app.submittedAt)} day${UW.daysSince(c.app.submittedAt) === 1 ? '' : 's'} ago</span>`; return p.flagged.length ? `<span class="sub2 h">${p.done} of ${p.total} approved · ${p.flagged.length} rejected</span>` : p.ready ? '<span class="sub2 ok">Every item approved · ready to approve the case</span>' : `<span class="sub2">${p.done} of ${p.total} approved</span>`; }
+    if (c.status === 'Returned to Sales') { const it = c.local.returned.items, t = (c.local.returned.feedback ? 'Feedback: ' + c.local.returned.feedback + ' · ' : '') + it.map(i => i.label + ': ' + i.reason).join(' · '); return `<span class="sub2 h" title="${esc(t)}">${it.length > 1 ? it.length + ' items rejected · ' : ''}${esc(it[0].label)}: ${esc(it[0].reason)}</span>`; }
     if (c.status === 'Approved') return `<span class="sub2">Approved ${UW.fmtDate(c.local.approved.at)} by ${esc(c.local.approved.by)}</span>`;
     return '';
   }
@@ -60,13 +59,13 @@
     }
     const page = list.slice((st.page - 1) * st.size, st.page * st.size);
     return `<div class="tscroll"><table class="dt uwq"><thead><tr>${head}<th><span class="sr-only">Open</span></th></tr></thead><tbody>
-      ${page.map(c => `<tr tabindex="0" data-href="${href(c)}" aria-label="Open ${esc(c.app.biz)}, ${c.ch} case">
+      ${page.map(c => `<tr tabindex="0" data-href="${href(c)}" class="${c.status === 'Returned to Sales' ? 'dim' : ''}" aria-label="Open ${esc(c.app.biz)}, ${c.ch} case${c.status === 'Returned to Sales' ? ', returned to Sales, view only' : ''}">
         <td><div class="mer"><span class="mav" aria-hidden="true">${UW.initials(c.app.biz)}</span><span class="two"><span class="p">${esc(c.app.biz)}</span><span class="s">${esc(c.id)} · ${esc(c.app.id)}</span></span></div></td>
         <td>${UW.chTag(c.ch)}</td><td>${services(c)}</td>
         <td>${UW.chip(c.status)}${secondLine(c)}</td>${mgr() ? `<td>${who(c)}</td>` : ''}
         <td class="two num"><span class="p" style="font-weight:400">${UW.fmtDate(c.app.submittedAt)}</span><span class="s">by ${esc(c.app.sales)}</span></td>
         <td class="go">${icon('right', 'ic mirror')}</td></tr>`).join('')}</tbody></table></div>
-      <div class="rcards-l">${page.map(c => `<a class="rc" href="${href(c)}"><span class="top"><span class="mav" aria-hidden="true">${UW.initials(c.app.biz)}</span><span class="t"><b>${esc(c.app.biz)}</b><span>${esc(c.id)} · ${esc(c.app.industry)}</span></span>${UW.chTag(c.ch)}</span>
+      <div class="rcards-l">${page.map(c => `<a class="rc ${c.status === 'Returned to Sales' ? 'dim' : ''}" href="${href(c)}"><span class="top"><span class="mav" aria-hidden="true">${UW.initials(c.app.biz)}</span><span class="t"><b>${esc(c.app.biz)}</b><span>${esc(c.id)} · ${esc(c.app.industry)}</span></span>${UW.chTag(c.ch)}</span>
         <span>${UW.chip(c.status)}${secondLine(c)}</span>${services(c)}<span class="meta">${mgr() ? `<span>${esc(c.assignee)}</span>` : ''}<span>Submitted ${UW.fmtDate(c.app.submittedAt)}</span></span></a>`).join('')}</div>`;
   }
   function pager(list) {

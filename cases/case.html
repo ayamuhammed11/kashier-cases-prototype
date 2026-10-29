@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Underwriting Case</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../sales-applications/shared/base.css">
+<link rel="stylesheet" href="../sales-applications/shared/sa.css">
+<style>
+  /* One underwriting case: a detail page (layout.md §7b, 1305), the case sections and a review aside at xl */
+  .wrap { max-width: 1305px; margin-inline: auto; display: flex; flex-direction: column; gap: 24px; }
+  .ph > .ph-row { justify-content: flex-end; }
+  .cgrid { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .cmain, .caside { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+  @media (min-width: 1280px) { .cgrid { grid-template-columns: minmax(0, 1fr) 340px; } }
+  /* below xl the review progress comes first, so the reviewer sees what is left before the sections */
+  @media (max-width: 1279px) { .caside { order: -1; } }
+  .banner.warn { border-color: var(--mango-20); background: var(--mango-10); }
+  .banner.warn > svg { color: var(--mango-70); flex-shrink: 0; }
+  .banner.ok > svg { color: var(--lemon-80); flex-shrink: 0; }
+  .banner > svg { flex-shrink: 0; color: var(--link); }
+  .banner b { display: block; }
+  .rj-banner .rj li { display: flex; gap: 8px; align-items: baseline; }
+  .proto-note { font-size: 12px; color: var(--muted-fg); }
+
+  /* section heading row: title, count, then the tools on the end */
+  .rvs > .sub-h { margin-block: 8px -4px; color: var(--cadet-base); }
+  .sec-h .cnt { font-family: var(--font-body); font-size: 13px; font-weight: 400; color: var(--muted-fg); }
+  .rvs { display: flex; flex-direction: column; gap: 12px; }
+  /* one review item: name and controls on top, its content under it */
+  .rv { border: 1px solid var(--border); border-radius: var(--radius); background: var(--white); scroll-margin-top: 96px; }
+  .rv.bad { border-color: #FFD0D6; }
+  .rv.hi { box-shadow: 0 0 0 2px var(--primary); }
+  .rv-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; flex-wrap: wrap; }
+  .rv-h .t { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px; }
+  .rv-h .t b { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rv-h .t .ar { font-size: 13px; font-weight: 400; color: var(--cadet-base); }
+  .rv-h .t .m { font-size: 12px; color: var(--muted-fg); }
+  .rv-a { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rv-b { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .rv-n { margin: 0 16px 12px; padding: 10px 12px; border-radius: var(--radius); font-size: 13px; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+  .rv-n.bad { background: var(--error-10); color: var(--destructive); }
+  .rv-n.bad span { color: var(--foreground); flex: 1; min-width: 200px; }
+  .rv-n.ok { background: var(--lemon-10); color: var(--lemon-80); }
+  .rv-f { margin: 0 16px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .rv-f .inp { flex: 1; min-width: 220px; }
+  .vby { font-size: 12px; color: var(--muted-fg); }
+  .dot { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--cadet-07); display: inline-grid; place-items: center; color: var(--white); flex-shrink: 0; }
+  .dot.ok { background: var(--success); border-color: var(--success); }
+  .dot.flag { background: var(--destructive); border-color: var(--destructive); }
+  .also { font-size: 12px; color: var(--cadet-base); display: inline-flex; gap: 4px; align-items: center; }
+
+  /* rates */
+  .rscroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+  .rtbl th, .rtbl td.num { white-space: nowrap; }
+  .rtbl td { font-size: 13px; }
+  .rtbl .below { color: var(--mango-70); font-weight: 600; }
+  .svc-con { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; font-size: 13px; }
+  .svc-con .k { color: var(--cadet-base); }
+  .svc-opts { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--cadet-base); }
+  .svc-opts b { color: var(--foreground); font-weight: 600; }
+  .files { display: flex; gap: 8px; flex-wrap: wrap; }
+  .fbtn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding-inline: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); font-size: 13px; color: var(--foreground); max-width: 280px; }
+  .fbtn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fbtn:hover { border-color: var(--primary); color: var(--primary); }
+  .fbtn:active { background: var(--primary-10); }
+  .links { display: flex; flex-direction: column; gap: 6px; }
+  .links a { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; overflow-wrap: anywhere; }
+  .pays { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  @media (min-width: 768px) { .pays { grid-template-columns: 1fr 1fr; } }
+  .pay { border: 1px solid var(--border-subtle); background: var(--bg); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; min-width: 0; }
+  .pay b { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+  .pay .dl { grid-template-columns: minmax(120px, auto) 1fr; gap: 6px 12px; margin-block-start: 4px; }
+  .pay .dl dd { font-weight: 600; }
+
+  /* aside */
+  .acard { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .acard h2 { font-family: var(--font-body); font-size: 16px; font-weight: 700; }
+  .bar { height: 8px; border-radius: 99px; background: var(--muted); overflow: hidden; display: flex; }
+  .bar i { display: block; height: 100%; background: var(--success); }
+  .bar i.f { background: var(--destructive); }
+  .pnum { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--cadet-base); }
+  .pnum b { font-size: 20px; color: var(--foreground); font-family: var(--font-display); }
+  .ck { display: flex; flex-direction: column; gap: 12px; }
+  .ck h3 { font-family: var(--font-body); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; color: var(--cadet-base); margin-block-end: -4px; }
+  .ck ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .ck button { width: 100%; display: flex; align-items: center; gap: 10px; padding: 6px 4px; border: 0; background: none; text-align: start; border-radius: 4px; color: var(--foreground); }
+  .ck button:hover { background: var(--primary-10); }
+  .ck button:active { background: var(--ocean-20); }
+  .ck button .l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ck button .s { font-size: 12px; color: var(--muted-fg); }
+  .ck button .s.bad { color: var(--destructive); }
+  .ck .dot { width: 18px; height: 18px; }
+  .sib { display: flex; flex-direction: column; gap: 8px; }
+  .sib a, .sib div { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--foreground); flex-wrap: wrap; }
+  .sib a:hover { border-color: var(--primary); }
+  .sib .sp { flex: 1; }
+  .sib .cur { background: var(--primary-10); border-color: var(--ocean-20); }
+  .aside-dl { grid-template-columns: minmax(96px, auto) 1fr; font-size: 13px; }
+  .who { display: inline-flex; align-items: center; gap: 8px; }
+  .who .av { width: 28px; height: 28px; border-radius: 50%; background: var(--primary-10); color: var(--primary); display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+
+  /* doc preview */
+  .pv { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); min-height: 320px; display: grid; place-items: center; text-align: center; padding: 24px; color: var(--cadet-base); }
+  .pv .ei { width: 56px; height: 56px; border-radius: 50%; background: var(--primary-10); color: var(--primary); display: grid; place-items: center; margin: 0 auto 12px; }
+  .btn[aria-disabled="true"] { opacity: .5; }
+  @media (pointer: coarse) { .ck button, .fbtn { min-height: 44px; } }
+</style>
+</head>
+<body>
+<script src="../sales-applications/shared/agent-icons.js"></script>
+<script src="../sales-applications/shared/sa-core.js"></script>
+<script src="shared/uw-core.js"></script>
+<script>
+(function () {
+  const { esc } = SA, icon = UW.icon;
+  const qs = new URLSearchParams(location.search);
+  const ID = qs.get('id') || 'UW-1040-ONL';
+  let flagFor = '', hi = '';
+  /* The review groups of a case: the merchant, then each service on its own (pricing, contract and its documents), the channel setup and the payout. */
+  const groupsOf = c => [['merchant', 'Merchant']].concat(c.svcIds.map(id => ['svc:' + id, UW.nmOf(id)]), [['setup', c.ch + ' setup'], ['payout', 'Payout methods']]);
+  const fmtN = v => String(Math.round(Number(v) * 100) / 100);
+  const rateTxt = r => `${fmtN(r.rate)}% + ${fmtN(r.fee)} EGP`;
+
+  /* ---------- Review controls ---------- */
+  function stateChip(i) {
+    if (i.state === 'ok') return '<span class="sc ok">Approved</span>';
+    if (i.state === 'flag') return `<span class="sc bad">${i.auto ? 'Missing' : 'Rejected'}</span>`;
+    return '<span class="sc neu">Not reviewed</span>';
+  }
+  const dot = st => `<span class="dot ${st === 'todo' ? '' : st}" aria-hidden="true">${st === 'ok' ? icon('tick', 'ic-14', 2.5) : st === 'flag' ? icon('x', 'ic-14', 2.5) : ''}</span>`;
+  /* The same item in the other case of this application (merchant, payout, shared documents): a hint, each case is reviewed on its own. */
+  function alsoIn(c, i) {
+    if (i.group.startsWith('svc:') || i.key === 'web' || i.key === 'pos') return '';
+    const s = UW.siblings(c).map(x => ({ x, it: UW.items(x).find(y => y.key === i.key) })).find(o => o.it && o.it.state === 'ok');
+    return s ? `<span class="also">${icon('check', 'ic-14')}Approved in the ${s.x.ch} case by ${esc(s.it.by)}</span>` : '';
+  }
+  function rv(c, i, body, extraHead = '') {
+    const can = UW.canReview(c);
+    const act = !can ? stateChip(i)
+      : i.state === 'ok' ? `${stateChip(i)}<button type="button" class="link-btn" data-act="cClear" data-k="${esc(i.key)}" data-l="${esc(i.label)}">Undo</button>`
+      : i.state === 'flag' ? stateChip(i)
+      : `<button type="button" class="btn btn-outline btn-sm" data-act="cFlagOpen" data-k="${esc(i.key)}">${icon('x', 'ic-16')}Reject</button><button type="button" class="btn btn-outline btn-sm" data-act="cVerify" data-k="${esc(i.key)}" data-l="${esc(i.label)}">${icon('tick', 'ic-16', 2)}Approve</button>`;
+    const note = i.state === 'flag' ? `<div class="rv-n bad">${icon(i.auto ? 'warn' : 'xcircle', 'ic-16')}<span><b>${i.auto ? 'Missing' : 'Rejected'}:</b> ${esc(i.auto ? i.reason.replace(/\.?$/, '.') : i.reason)}${i.auto ? ' Return the case to Sales to request it.' : ''}${!i.auto && i.by ? ` <span class="vby">· ${esc(i.by)}, ${UW.fmtDT(i.at)}</span>` : ''}</span>${can && !i.auto ? `<button type="button" class="link-btn" data-act="cClear" data-k="${esc(i.key)}" data-l="${esc(i.label)}">Undo rejection</button>` : ''}</div>` : '';
+    const form = flagFor === i.key ? `<div class="rv-f"><label class="sr-only" for="flagReason">Why is ${esc(i.label)} rejected?</label><input class="inp" id="flagReason" placeholder="What is wrong, and what Sales should fix" autofocus><button type="button" class="btn btn-danger btn-sm" data-act="cFlag" data-k="${esc(i.key)}" data-l="${esc(i.label)}">Reject</button><button type="button" class="btn btn-ghost btn-sm" data-act="cFlagCancel">Cancel</button></div>` : '';
+    const by = i.state === 'ok' && i.by ? `<span class="vby">Approved by ${esc(i.by)} · ${UW.fmtDT(i.at)}</span>` : alsoIn(c, i);
+    return `<div class="rv ${i.state === 'flag' ? 'bad' : ''} ${hi === i.key ? 'hi' : ''}" id="rv-${esc(i.key).replace(/[^\w-]/g, '_')}">
+      <div class="rv-h">${dot(i.state)}<div class="t"><b>${esc(i.short || i.label)}${extraHead}</b>${i.sub ? `<span class="m">${esc(i.sub)}</span>` : ''}${by}</div><div class="rv-a">${act}</div></div>
+      ${note}${form}${body ? `<div class="rv-b">${body}</div>` : ''}</div>`;
+  }
+  const fileBtn = (name, doc, key = '') => `<button type="button" class="fbtn" data-act="cView" data-f="${esc(name)}" data-d="${esc(doc || '')}" data-k="${esc(key)}">${icon('eye', 'ic-16')}<span>${esc(name)}</span></button>`;
+
+  /* ---------- Sections ---------- */
+  function secHead(id, title, list, sub, tools = '') {
+    const done = list.filter(i => i.state === 'ok').length;
+    return `<div class="sec-h"><div class="tt"><h2 id="${id}H">${title}<span class="cnt">${done} of ${list.length} approved</span></h2>${sub ? `<p>${sub}</p>` : ''}</div>${tools}</div>`;
+  }
+  /* Every file in the case, once each: its documents, the signed PF contracts and the store image. */
+  function caseFiles(c) {
+    const out = [], add = (name, what) => { if (name && !out.some(f => f.name === name)) out.push({ name, what }); };
+    UW.items(c).forEach(i => {
+      if (i.doc) UW.docFiles(c.app, i.doc, c).forEach(n => add(n, i.doc));
+      if (i.contract) add(UW.contractFile(c.app, i.contract, c.local), i.contract);
+    });
+    if (c.ch === 'POS') add(c.app.storeImage || (c.local.uploaded.includes('Store Image') ? 'store-image-resubmitted.jpg' : ''), 'Store Image');
+    return out;
+  }
+  function merchantSec(c, list) {
+    const a = c.app, i = list[0];
+    const dl = `<dl class="dl"><dt>Business name</dt><dd>${esc(a.biz)}</dd><dt>Contact</dt><dd>${esc(a.contact)}</dd><dt>Email</dt><dd>${esc(a.email)}</dd><dt>Phone</dt><dd><span dir="ltr">${esc(a.phone)}</span></dd>
+      <dt>Merchant type</dt><dd>${esc(a.entity)}</dd><dt>Industry</dt><dd>${esc(a.industry)}</dd><dt>Activities</dt><dd>${a.activities.map(esc).join(', ')}</dd><dt>Owner nationality</dt><dd>${esc(a.owner || 'Not set')}</dd>
+      <dt>Zoho CRM record</dt><dd><a href="#" target="_blank" rel="noopener">${esc(a.zoho)} ${icon('ext', 'ic-14')}</a></dd></dl>`;
+    return `<section class="card sec" id="s-merchant" aria-labelledby="s-merchantH">${secHead('s-merchant', 'Merchant', list, 'From the application. Shared by every case of this application.')}<div class="rvs">${rv(c, i, dl)}</div></section>`;
+  }
+  /* One section per service: its pricing and contract, then every document the document rules require for this service,
+     each approved or rejected here. A document two services need is reviewed under each of them. */
+  function servicesSec(c, list) {
+    return c.svcIds.map(id => {
+      const s = c.app.svc[id], items = list.filter(i => i.svc === id), pricing = items.find(i => i.key === 'svc:' + id), docs = items.filter(i => i.doc);
+      const banked = s.lines.some(l => l.bank), banks = s.lines.map(l => l.bank).filter(Boolean), sid = 's-' + id.replace(/\W/g, '');
+      const rows = s.lines.map(l => l.rates.map((r, ri) => `<tr>${banked && ri === 0 ? `<td rowspan="${l.rates.length}"><b>${esc(l.bank)}</b></td>` : ''}<td>${esc(r.label)}</td><td class="num ${r.rate < r.pub ? 'below' : ''}">${rateTxt(r)}</td><td class="num">${rateTxt({ rate: r.pub, fee: r.fee })}</td>
+        <td>${r.approval ? `<span class="flag ok">${icon('check', 'ic-14')}Approved by ${esc(r.approval.by)}</span><div class="hint">${esc(r.approval.role)}</div>` : '<span class="hint">Published rate</span>'}</td></tr>`).join('')).join('');
+      const con = pricing.contract ? (() => { const f = UW.contractFile(c.app, pricing.contract, c.local); return `<div class="svc-con"><span class="k">Contract</span>${f ? `<div class="files">${fileBtn(f, pricing.contract, pricing.key)}</div><span class="hint">${esc(pricing.contract)}${pricing.contract === 'Kashier PF Contract' ? ' · covers Card, Wallet, Bank Installments and Basata' : ''}</span>` : `<span class="flag h">${icon('warn', 'ic-14')}The ${esc(pricing.contract)} is not attached</span>`}</div>`; })() : '';
+      const pBody = `<div class="rscroll"><table class="rtbl"><thead><tr>${banked ? '<th>Bank</th>' : ''}<th>Rate type</th><th>Requested</th><th>Published</th><th>Rate approval</th></tr></thead><tbody>${rows}</tbody></table></div>${con}
+        <div class="svc-opts"><span>Model <b>${esc(s.model)}</b></span><span>Currencies <b>${s.currencies.map(esc).join(', ')}</b></span>${s.ops.length ? `<span>Operations <b>${s.ops.map(esc).join(', ')}</b></span>` : ''}</div>`;
+      const dBody = d => { const f = UW.docFiles(c.app, d.doc, c); return f.length ? `<div class="files">${f.map(n => fileBtn(n, d.doc, d.key)).join('')}</div>` : ''; };
+      const sub = [c.ch + ' service', UW.SVC_HINT[UW.nmOf(id)], banks.join(', ')].filter(Boolean).join(' · ');
+      return `<section class="card sec" id="${sid}" aria-labelledby="${sid}H">${secHead(sid, `${esc(UW.nmOf(id))} <span class="tag">${esc(s.model)}</span>`, items, esc(sub))}
+        <div class="rvs">${rv(c, pricing, pBody)}${docs.length ? `<h3 class="sub-h">Required documents (${docs.length})</h3>` : ''}${docs.map(d => rv(c, d, dBody(d), ` <span class="ar">· <bdi lang="ar">${UW.DOCS[d.doc].ar}</bdi></span>`)).join('')}</div></section>`;
+    }).join('');
+  }
+  function setupSec(c, list) {
+    const a = c.app, i = list[0];
+    const body = c.ch === 'Online'
+      ? `<div class="links">${a.websites.map(w => `<a href="https://${esc(w.replace(/^https?:\/\//, ''))}" target="_blank" rel="noopener">${icon('globe', 'ic-16')}${esc(w)}${icon('ext', 'ic-14')}</a>`).join('')}</div><p class="hint" style="margin:0">Check that the links show what the merchant sells, with prices, contact details and a refund policy.</p>`
+      : `<dl class="dl"><dt>POS terminals</dt><dd>${a.terminals}</dd><dt>Store image</dt><dd>${a.storeImage || c.local.uploaded.includes('Store Image') ? `<div class="files">${fileBtn(a.storeImage || 'store-image-resubmitted.jpg', 'Store Image', 'pos')}</div>` : '<span class="flag h">' + icon('warn', 'ic-14') + 'Not uploaded</span>'}</dd></dl>`;
+    return `<section class="card sec" id="s-setup" aria-labelledby="s-setupH">${secHead('s-setup', c.ch === 'Online' ? 'Online setup' : 'POS setup', list, c.ch === 'Online' ? 'Where the merchant sells online.' : 'The terminals requested and the store the bank will visit.')}<div class="rvs">${rv(c, i, body)}</div></section>`;
+  }
+  function payoutSec(c, list) {
+    if (!list.length) return '';
+    // Every detail in full, unmasked: Underwriting checks the account against the merchant and the bank letter.
+    const row = (k, v, ltr) => `<dt>${k}</dt><dd>${ltr ? `<span class="num" dir="ltr">${esc(v || '—')}</span>` : esc(v || '—')}</dd>`;
+    const p = c.app.payouts.map((x, n) => `<div class="pay"><b>Payout method ${n + 1}${x.name ? ': ' + esc(x.name) : ''} <span class="tag info">${x.type === 'bank' ? 'Bank account' : 'E-wallet'}</span>${n === 0 ? '<span class="tag ok">Primary</span>' : ''}</b>
+      <dl class="dl">${x.type === 'bank' ? row('Bank', x.bank) + row('Branch', x.branch) + row('Account holder', x.holder) + row('Account number', x.acct, true) : row('Wallet provider', x.provider) + row('Wallet holder', x.wholder) + row('Wallet mobile number', x.mobile, true)}</dl></div>`).join('');
+    return `<section class="card sec" id="s-payout" aria-labelledby="s-payoutH">${secHead('s-payout', 'Payout methods', list, 'Where settlements are paid. Check the holder name matches the merchant.')}<div class="rvs">${rv(c, list[0], `<div class="pays">${p}</div>`)}</div></section>`;
+  }
+
+  /* ---------- Header, banner, tracking, aside ---------- */
+  function header(c) {
+    const m = UW.me(), chev = `<svg class="ic-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">${AGENT_ICONS['chevron-right']}</svg>`;
+    return `<header class="hdr"><div class="hdr-l"><nav class="crumb" aria-label="Breadcrumb"><a href="index.html">Cases</a>${chev}<span aria-current="page">${esc(c.id)}</span></nav>
+      <h1>${esc(c.app.biz)} · ${c.ch}</h1>
+      <p class="desc">${c.svcIds.length} ${c.ch} service${c.svcIds.length === 1 ? '' : 's'} from application ${esc(c.app.id)}. Review each service on its own: its pricing, its contract and every document it requires. Then approve the case, or return it to Sales.</p>
+      <div class="ph-meta">${UW.chip(c.status)}${UW.chTag(c.ch)}<span class="mi">${icon('user', 'ic-14')}<span>${esc(c.assignee)}</span></span><span class="mi">${icon('clock', 'ic-14')}<span>Submitted ${UW.fmtDate(c.app.submittedAt)} by ${esc(c.app.sales)} · <button type="button" class="link-btn" data-act="cLog">View activity log</button></span></span></div>
+      </div><button type="button" class="profile" aria-label="Account: ${esc(m.name)}"><span class="pav">${m.init}</span><span class="pdata"><span class="pname">${esc(m.name)}</span><span class="pmail">${esc(m.role)}</span></span>${icon('chevron', 'ic-16')}</button></header>`;
+  }
+  function actions(c) {
+    const m = UW.me(), out = [], files = caseFiles(c).length;
+    if (files) out.push(`<button type="button" class="btn btn-outline" data-act="cDlAll" title="Every document, signed contract and the store image of this case, as one zip">${icon('download', 'ic')}Download all documents (${files})</button>`);
+    if (m.manager && ['New', 'In Review', 'Returned to Sales'].includes(c.status)) out.push(`<button type="button" class="btn btn-outline" data-act="cAssign" aria-haspopup="menu">${icon('userplus', 'ic')}Reassign</button>`);
+    // Return to Sales shows once an item is rejected or missing; Approve case needs every item approved.
+    if (UW.canReview(c)) { const p = UW.progress(c); out.push(`${p.flagged.length ? `<button type="button" class="btn btn-outline-danger" data-act="cReturn">${icon('uturn', 'ic')}Return to Sales</button>` : ''}<button type="button" class="btn btn-primary" data-act="cApprove" aria-disabled="${!p.ready}">${icon('tick', 'ic', 2)}Approve case</button>`); }
+    return out.length ? `<div class="ph-row">${out.join('')}</div>` : '';
+  }
+  function banner(c) {
+    const p = UW.progress(c), L = c.local;
+    if (c.status === 'New' && UW.canReview(c)) return `<div class="banner">${icon('user', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)} by round robin on ${UW.fmtDT(c.app.submittedAt)}</b><p>Not started yet. It moves to In Review with the first item approved or rejected.</p></div></div>`;
+    if (c.status === 'New') return `<div class="banner">${icon('info', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)}. View only.</b><p>Only the assignee or the Underwriting Manager can review this case.</p></div></div>`;
+    if (c.status === 'In Review' && !UW.canReview(c)) return `<div class="banner">${icon('info', 'ic-20')}<div><b>Assigned to ${esc(c.assignee)}. View only.</b><p>Only the assignee or the Underwriting Manager can review this case.${p.flagged.length ? ' ' + p.flagged.length + ' item' + (p.flagged.length === 1 ? ' is' : 's are') + ' rejected or missing.' : ''}</p></div></div>`;
+    if (c.status === 'In Review' && p.flagged.length) return `<div class="banner warn">${icon('xcircle', 'ic-20')}<div><b>${p.flagged.length} item${p.flagged.length === 1 ? '' : 's'} rejected or missing</b><p>The case can't be approved while an item is rejected or missing. Undo a rejection once it is resolved, or return the case to Sales: they get every rejected item with its reason.</p></div></div>`;
+    if (c.status === 'In Review' && p.ready) return `<div class="banner ok">${icon('check', 'ic-20')}<div><b>Every item is approved</b><p>Approve the case to approve the ${c.ch} services.</p></div></div>`;
+    if (c.status === 'Returned to Sales') { const r = L.returned; return `<div class="banner rj-banner">${icon('uturn', 'ic-20')}<div><b>Returned to Sales by ${esc(r.by)} on ${UW.fmtDT(r.at)}</b><p>${r.items.length} rejected item${r.items.length === 1 ? '' : 's'} to fix:</p>
+      <ul class="rj">${r.items.map(it => `<li>${icon('xcircle', 'ic-14')}<span><b style="display:inline;color:var(--foreground)">${esc(it.label)}:</b> ${esc(it.reason)}</span></li>`).join('')}</ul>
+      <p style="margin-top:12px"><button type="button" class="btn btn-outline btn-sm" data-act="cResubmit">${icon('send', 'ic-16')}Simulate the Sales resubmission</button> <span class="proto-note">Prototype only</span></p></div></div>`; }
+    if (c.status === 'Approved') return `<div class="banner ok">${icon('check', 'ic-20')}<div><b>Approved by ${esc(L.approved.by)} on ${UW.fmtDT(L.approved.at)}</b><p>The ${c.ch} services are approved.${L.approved.comment ? ' Comment: ' + esc(L.approved.comment) : ''} Underwriting's part of this case is done.</p></div></div>`;
+    return '';
+  }
+  function tracking(c) {
+    const L = c.local, ret = c.status === 'Returned to Sales';
+    const steps = [['Submitted', `${UW.fmtDate(c.app.submittedAt)} · ${esc(c.app.sales)}`], [ret ? 'Returned to Sales' : 'Underwriting review', ret ? UW.fmtDate(L.returned.at) : esc(c.assignee)], ['Approved', L.approved ? `${UW.fmtDate(L.approved.at)} · ${esc(L.approved.by)}` : '']];
+    const cur = { New: 1, 'In Review': 1, 'Returned to Sales': 1, Approved: 3 }[c.status];
+    return `<div class="card sec"><h2 class="sub-h" style="font-size:16px">Case tracking</h2><ol class="track">${steps.map(([s, h], i) => `<li class="${i < cur ? 'done' : i === cur ? 'now' : ''}"><span class="d" ${ret && i === 1 ? 'style="border-color:var(--destructive);color:var(--destructive)"' : ''}>${i < cur ? icon('tick', 'ic-14', 2.5) : i + 1}</span><b>${s}</b><span class="hint">${h}</span></li>`).join('')}</ol></div>`;
+  }
+  function aside(c) {
+    const p = UW.progress(c), pct = n => (100 * n / Math.max(1, p.total)).toFixed(1) + '%';
+    const groups = groupsOf(c).map(([g, t]) => [t, p.list.filter(i => i.group === g)]).filter(x => x[1].length);
+    const review = `<div class="card acard"><h2>Review</h2>
+      <div class="pnum"><span><b>${p.done}</b> of ${p.total} approved</span><span>${p.flagged.length ? `<span class="flag h">${icon('xcircle', 'ic-14')}${p.flagged.length} rejected</span>` : ''}</span></div>
+      <div class="bar" role="progressbar" aria-label="Items approved" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${p.done}"><i style="width:${pct(p.done)}"></i><i class="f" style="width:${pct(p.flagged.length)}"></i></div>
+      <div class="ck">${groups.map(([t, l]) => `<div><h3>${t}</h3><ul>${l.map(i => `<li><button type="button" data-act="cJump" data-k="${esc(i.key)}">${dot(i.state)}<span class="l">${esc(i.short || i.label)}</span><span class="s ${i.state === 'flag' ? 'bad' : ''}">${i.state === 'ok' ? 'Approved' : i.state === 'flag' ? (i.auto ? 'Missing' : 'Rejected') : 'To review'}</span></button></li>`).join('')}</ul></div>`).join('')}</div></div>`;
+    const sibs = [c].concat(UW.siblings(c));
+    const app = `<div class="card acard"><h2>Application</h2>
+      <dl class="dl aside-dl"><dt>Application</dt><dd>${esc(c.app.id)}</dd><dt>Salesperson</dt><dd>${esc(c.app.sales)}</dd><dt>Submitted</dt><dd>${UW.fmtDT(c.app.submittedAt)}</dd>${c.app.comment ? `<dt>Comment</dt><dd>${esc(c.app.comment)}</dd>` : ''}</dl>
+      <div class="sib"><span class="hint">Cases of this application</span>${sibs.map(x => { const inner = `${UW.chTag(x.ch)}<b>${esc(x.id)}</b><span class="sp"></span>${UW.chip(x.status)}`; return x.id === c.id ? `<div class="cur" aria-current="page">${inner}</div>` : `<a href="case.html?id=${encodeURIComponent(x.id)}">${inner}</a>`; }).join('')}</div></div>`;
+    return `<aside class="caside" aria-label="Review progress">${review}${app}</aside>`;
+  }
+
+  /* ---------- Overlays ---------- */
+  function openLog(c) {
+    SA.drawer({ size: 'md', title: 'Activity Log', sub: `${esc(c.id)} · ${c.local.events.length} events`,
+      render(api) { api.body.innerHTML = `<ul class="log">${c.local.events.map(e => `<li><span class="li">${icon(e.ic || 'pencil', 'ic-16')}</span><div><div class="t num">${UW.fmtDT(e.t)}</div><div><b>${esc(e.who)}</b> ${esc(e.text)}</div>${e.detail ? `<div class="d">${esc(e.detail)}</div>` : ''}</div></li>`).join('')}</ul>`; } });
+  }
+  function openDoc(c, file, doc, key) {
+    const it = UW.items(c).find(i => i.key === key);
+    SA.drawer({ size: 'md', title: esc(file), sub: esc(doc) + ' · uploaded by ' + esc(c.app.sales),
+      render(api) {
+        api.body.innerHTML = `<div class="pv"><div><span class="ei">${icon('doc', 'ic-24')}</span><b>${esc(file)}</b><p class="hint" style="margin:4px 0 0">The file preview opens here in the portal.</p></div></div>
+          <dl class="dl"><dt>Document</dt><dd>${esc(doc)}</dd><dt>Uploaded</dt><dd>${UW.fmtDT(c.app.submittedAt)} by ${esc(c.app.sales)}</dd>${it ? `<dt>Review</dt><dd>${stateChip(it)}</dd>` : ''}</dl>`;
+        const can = it && UW.canReview(c) && it.state === 'todo';
+        api.foot.innerHTML = `<button type="button" class="btn btn-ghost" data-dl>${icon('download', 'ic')}Download</button><span class="sp"></span>${can ? `<button type="button" class="btn btn-outline" data-f>${icon('x', 'ic')}Reject</button><button type="button" class="btn btn-primary" data-v>${icon('tick', 'ic', 2)}Approve</button>` : '<button type="button" class="btn btn-outline" data-c>Close</button>'}`;
+        api.foot.querySelector('[data-dl]').onclick = () => SA.toast(file + ' downloaded');
+        const cl = api.foot.querySelector('[data-c]'); if (cl) cl.onclick = () => api.close();
+        const v = api.foot.querySelector('[data-v]'); if (v) v.onclick = () => { UW.setReview(c, it.key, 'ok', '', it.label); api.close(true); SA.rerender(); SA.toast(it.label + ' approved'); };
+        const f = api.foot.querySelector('[data-f]'); if (f) f.onclick = () => { flagFor = it.key; api.close(true); SA.rerender(); jump(it.key); };
+      } });
+  }
+  function openAssign(c, btn) {
+    const html = `<div class="menu" role="menu" style="position:static;border:0">${UW.AGENTS.map(a => `<button type="button" role="menuitem" data-a="${esc(a)}" ${a === c.assignee ? 'aria-current="true"' : ''}><span class="who"><span class="av" aria-hidden="true">${UW.initials(a)}</span>${esc(a)}</span>${a === c.assignee ? '<span class="tag ok">Current</span>' : ''}</button>`).join('')}</div>`;
+    SA.popover(btn, html, el => {
+      el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { const a = b.dataset.a; SA.closePop(); if (a === c.assignee) return; UW.reassign(c, a); SA.rerender(); SA.toast(`${c.id} reassigned to ${a}`); });
+      el.querySelector('[data-a]').focus();
+    }, { width: 260 });
+  }
+  function openApprove(c) {
+    const p = UW.progress(c);
+    if (!p.ready) { const next = p.flagged[0] || p.list.find(i => i.state !== 'ok'); SA.toast(p.flagged.length ? `${p.flagged.length} item${p.flagged.length === 1 ? ' is' : 's are'} rejected or missing: return the case to Sales, or undo a resolved rejection` : `Approve the ${p.total - p.done} remaining item${p.total - p.done === 1 ? '' : 's'} first`); if (next) jump(next.key); return; }
+    const svcs = c.svcIds.map(id => { const b = c.app.svc[id].lines.map(l => l.bank).filter(Boolean); return `<li>${esc(UW.nmOf(id))}${b.length ? ' · ' + b.map(esc).join(', ') : ''}</li>`; }).join('');
+    SA.modal({ title: 'Approve this case?', sub: `The ${c.ch} services of <b>${esc(c.app.biz)}</b> are approved and the case closes.`,
+      body: `<ul style="margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:4px">${svcs}</ul><div class="fld"><label for="apc">Comment <span class="opt">(optional)</span></label><textarea class="inp" id="apc" placeholder="Anything worth noting about this approval?"></textarea><span class="hint">Saved in the activity log.</span></div>`,
+      foot: '<button type="button" class="btn btn-outline" data-n>Cancel</button><button type="button" class="btn btn-primary" data-y>Approve case</button>',
+      bind(api) {
+        api.el.querySelector('[data-n]').onclick = api.close;
+        api.el.querySelector('[data-y]').onclick = () => { UW.approve(c, api.el.querySelector('#apc').value.trim()); api.close(); scrollTo(0, 0); SA.rerender(); SA.toast(`${c.id} approved`); };
+      } });
+  }
+  function openReturn(c) {
+    const p = UW.progress(c);
+    if (!p.flagged.length) return;
+    SA.modal({ title: 'Return to Sales?', sub: `${esc(c.app.sales)} gets the ${c.ch} case of <b>${esc(c.app.biz)}</b> back with ${p.flagged.length === 1 ? 'the rejected item and its reason' : `the ${p.flagged.length} rejected items and their reasons`}.`,
+      body: `<ul class="rj" style="margin:0">${p.flagged.map(i => `<li>${icon('xcircle', 'ic-14')}<span><b style="color:var(--foreground)">${esc(i.label)}:</b> ${esc(i.reason)}</span></li>`).join('')}</ul>`,
+      foot: '<button type="button" class="btn btn-outline" data-n>Cancel</button><button type="button" class="btn btn-danger" data-y>Return to Sales</button>',
+      bind(api) {
+        api.el.querySelector('[data-n]').onclick = api.close;
+        api.el.querySelector('[data-y]').onclick = () => { UW.returnToSales(c); api.close(); scrollTo(0, 0); SA.rerender(); SA.toast(`${c.id} returned to ${c.app.sales}`); };
+      } });
+  }
+  function jump(key) {
+    hi = key; SA.rerender();
+    const el = document.getElementById('rv-' + key.replace(/[^\w-]/g, '_'));
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); const f = el.querySelector('#flagReason') || el.querySelector('button'); f && f.focus({ preventScroll: true }); }
+    setTimeout(() => { if (hi === key) { hi = ''; const e2 = document.getElementById('rv-' + key.replace(/[^\w-]/g, '_')); e2 && e2.classList.remove('hi'); } }, 1600);
+  }
+
+  const cur = () => UW.get(ID);
+  const V = {
+    key: 'uw-case', nav: 'Cases', protoTitle: 'Cases', pages: UW.PAGES, me: () => UW.me(),
+    protoControls: () => `<label class="lbl" for="uwAs">View as</label><select id="uwAs">${Object.values(UW.USERS).map(u => `<option value="${u.key}" ${UW.me().key === u.key ? 'selected' : ''}>${esc(u.name)} · ${u.manager ? 'Manager' : 'Agent'}</option>`).join('')}</select><button type="button" id="uwReset">Reset data</button>`,
+    bindProto() {
+      document.getElementById('uwAs').onchange = e => { UW.setMe(e.target.value); flagFor = ''; SA.rerender(); SA.toast('Viewing as ' + UW.me().name); };
+      document.getElementById('uwReset').onclick = () => { UW.resetAll(); location.reload(); };
+    },
+    render() {
+      const page = document.getElementById('page'), c = cur();
+      document.title = c ? `${c.id} · ${c.app.biz}` : 'Underwriting Case';
+      if (!c) { page.innerHTML = `<div class="wrap"><div class="card"><div class="empty"><span class="ei">${icon('docsearch', 'ic-24')}</span><h3>This case does not exist</h3><p>Check the case ID, or find the case in the Cases list.</p><a class="btn btn-outline btn-sm" href="index.html">Back to Cases</a></div></div></div>`; return; }
+      const list = UW.items(c), of = g => list.filter(i => i.group === g);
+      page.innerHTML = `<div class="wrap"><div class="ph">${header(c)}${actions(c)}</div>${banner(c)}${tracking(c)}
+        <div class="cgrid"><div class="cmain">${merchantSec(c, of('merchant'))}${servicesSec(c, list)}${setupSec(c, of('setup'))}${payoutSec(c, of('payout'))}</div>${aside(c)}</div></div>`;
+    },
+    act: {
+      cLog: () => { openLog(cur()); return false; },
+      cAssign: (d, el) => { openAssign(cur(), el); return false; },
+      cVerify: d => { UW.setReview(cur(), d.k, 'ok', '', d.l); flagFor = ''; },
+      cClear: d => { UW.setReview(cur(), d.k, 'todo', '', d.l); },
+      cFlagOpen: d => { flagFor = d.k; setTimeout(() => document.getElementById('flagReason')?.focus()); },
+      cFlagCancel: () => { flagFor = ''; },
+      cFlag: d => { const inp = document.getElementById('flagReason'), v = inp ? inp.value.trim() : ''; if (!v) { inp && inp.classList.add('err'); inp && inp.focus(); SA.toast('Say why it is rejected, so Sales knows what to fix'); return false; } UW.setReview(cur(), d.k, 'flag', v, d.l); flagFor = ''; },
+      cJump: d => { jump(d.k); return false; },
+      cView: d => { openDoc(cur(), d.f, d.d, d.k); return false; },
+      cDlAll: () => { const c = cur(), f = caseFiles(c); SA.toast(`${f.length} file${f.length === 1 ? '' : 's'} downloaded as ${UW.slug(c.app.biz)}-${c.ch.toLowerCase()}-documents.zip`); return false; },
+      cApprove: () => { openApprove(cur()); return false; },
+      cReturn: () => { openReturn(cur()); return false; },
+      cResubmit: () => { const c = cur(); UW.resubmit(c); scrollTo(0, 0); SA.toast(`${c.app.sales} resubmitted ${c.id}: back in review`); }
+    }
+  };
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'flagReason') { e.preventDefault(); document.querySelector('[data-act="cFlag"]')?.click(); } });
+  SA.mount(V);
+})();
+</script>
+</body>
+</html>

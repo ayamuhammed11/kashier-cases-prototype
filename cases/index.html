@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cases</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../sales-applications/shared/base.css">
+<link rel="stylesheet" href="../sales-applications/shared/sa.css">
+<link rel="stylesheet" href="../components/filter-bar.css">
+<style>
+  /* Cases list: a list page (tables.md), one row per case */
+  .wrap { max-width: 1600px; margin-inline: auto; display: flex; flex-direction: column; gap: 24px; }
+  .wrap > [data-live="body"] { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .lnav { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .stabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; background: linear-gradient(var(--border), var(--border)) left bottom / 100% 1px no-repeat; background-attachment: local; }
+  .stabs::-webkit-scrollbar { display: none; }
+  .stabs button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: 0; background: none; font-weight: 600; color: var(--muted-fg); border-block-end: 2px solid transparent; white-space: nowrap; flex-shrink: 0; }
+  .stabs button:first-child { padding-inline-start: 4px; }
+  .stabs button:hover { color: var(--foreground); }
+  .stabs button[aria-selected="true"] { color: var(--primary); border-color: var(--primary); }
+  .stabs .c { font-size: 12px; font-weight: 600; min-width: 22px; padding: 0 6px; border-radius: 99px; background: var(--muted); color: var(--cadet-base); text-align: center; }
+  .stabs [aria-selected="true"] .c { background: var(--primary-10); color: var(--primary); }
+  .stabs .c.attn { background: var(--mango-10); color: var(--mango-70); }
+
+  /* topbar search (layout.md §6b): 370px from 1440, 280px at 1280, a full-width row under the title below that */
+  .hdr { flex-wrap: wrap; }
+  .hdr .tsearch { align-self: center; display: flex; }
+  .hdr .tsearch.kf-search { width: 280px; max-width: none; flex: 0 0 auto; }
+  @media (min-width: 1440px) { .hdr .tsearch.kf-search { width: 370px; } }
+  @media (max-width: 1279px) { .hdr .tsearch { order: 3; flex-basis: 100%; } .hdr .tsearch.kf-search { width: 100%; } }
+  .lcard { background: var(--white); border: 1px solid var(--border-subtle); border-radius: var(--radius); min-width: 0; overflow: hidden; }
+
+  table.dt.uwq { min-width: 940px; }
+  .dt td { cursor: pointer; }
+  .dt th, .dt td { padding-inline: 12px; }
+  .dt th:first-child, .dt td:first-child { padding-inline-start: 16px; min-width: 250px; }
+  .dt .mer { display: flex; align-items: center; gap: 12px; }
+  .dt .mer .two { min-width: 0; }
+  .dt .two .p { font-weight: 600; white-space: nowrap; }
+  .dt .mer .two .s { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  .mav { width: 36px; height: 36px; border-radius: 4px; background: var(--primary); color: var(--white); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .dt td.num { white-space: nowrap; }
+  .dt td.go { width: 40px; padding-inline: 4px 12px; color: var(--cadet-base); }
+  .dt tr:focus-visible td { background: var(--primary-10); outline: none; }
+  .svcs { display: flex; flex-wrap: wrap; gap: 4px; max-width: 260px; }
+  .svcs .tag { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; }
+  .sub2 { display: block; margin-block-start: 4px; font-size: 12px; color: var(--muted-fg); max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sub2.h { color: var(--destructive); }
+  .sub2.m { color: var(--mango-70); font-weight: 600; }
+  .sub2.ok { color: var(--lemon-80); font-weight: 600; }
+  .who { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .who .av { width: 28px; height: 28px; border-radius: 50%; background: var(--primary-10); color: var(--primary); display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+  .pager select { border: 1px solid var(--border); border-radius: 4px; height: 28px; padding: 0 6px; background: var(--white); }
+  @media (pointer: coarse) { .pager select { height: 44px; } }
+  .skel-row td span { display: block; height: 12px; border-radius: 2px; background: linear-gradient(90deg, var(--muted) 0%, #ECEEEE 50%, var(--muted) 100%); background-size: 200% 100%; animation: sk 1s linear infinite; }
+
+  /* below 1280: record cards (lists.md §1), 2-up on tablets */
+  .rcards-l { display: none; }
+  @media (max-width: 1279px) {
+    .tscroll { display: none; }
+    .rcards-l { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+    .rc { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--white); text-align: start; width: 100%; color: var(--foreground); }
+    .rc:active { background: var(--primary-10); }
+    .rc .top { display: flex; align-items: center; gap: 12px; }
+    .rc .top .t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .rc .top .t b { font-weight: 600; }
+    .rc .top .t span, .rc .meta { font-size: 12px; color: var(--muted-fg); }
+    .rc .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+    .rc .svcs { max-width: none; }
+  }
+  @media (min-width: 768px) and (max-width: 1279px) { .rcards-l { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 767px) { .pager .rpp { display: none; } }
+</style>
+</head>
+<body>
+<script src="../components/filter-bar.js"></script>
+<script src="../sales-applications/shared/agent-icons.js"></script>
+<script src="../sales-applications/shared/sa-core.js"></script>
+<script src="shared/uw-core.js"></script>
+<script src="shared/uw-queue.js"></script>
+<script>
+(function () {
+  const { esc } = SA;
+  let data = 'loaded';
+  const V = {
+    key: 'uw-queue', nav: 'Cases', protoTitle: 'Cases', pages: UW.PAGES, me: () => UW.me(),
+    protoControls: () => `<label class="lbl" for="uwAs">View as</label><select id="uwAs">${Object.values(UW.USERS).map(u => `<option value="${u.key}" ${UW.me().key === u.key ? 'selected' : ''}>${esc(u.name)} · ${u.manager ? 'Manager' : 'Agent'}</option>`).join('')}</select><label class="lbl" for="dstate">Data</label><select id="dstate">${['loaded', 'loading', 'empty'].map(d => `<option value="${d}" ${data === d ? 'selected' : ''}>${d[0].toUpperCase() + d.slice(1)}</option>`).join('')}</select><button type="button" id="uwReset">Reset data</button>`,
+    bindProto() {
+      document.getElementById('uwAs').onchange = e => { UW.setMe(e.target.value); UWQueue.reset(); SA.rerender(); SA.toast('Viewing as ' + UW.me().name); };
+      document.getElementById('dstate').onchange = e => { data = e.target.value; UWQueue.setData(data); SA.rerender(); };
+      document.getElementById('uwReset').onclick = () => { UW.resetAll(); location.reload(); };
+    },
+    render() { UWQueue.render(document.getElementById('page')); },
+    chg: UWQueue.chg,
+    act: UWQueue.act
+  };
+  document.addEventListener('click', e => { const tr = e.target.closest('tr[data-href]'); if (tr) location.href = tr.dataset.href; });
+  document.addEventListener('keydown', e => { const tr = e.target.closest && e.target.closest('tr[data-href]'); if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); location.href = tr.dataset.href; } });
+  SA.mount(V);
+})();
+</script>
+</body>
+</html>
